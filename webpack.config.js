@@ -35,16 +35,17 @@ module.exports = {
             },
             {
                 test: /\.scss$/,
-                loader: 'style!css!sass'
+                loader: 'style-loader!css-loader!sass-loader'
             },
             {
                 test: /\.css$/,
-                loader: 'style!css'
+                loader: 'style-loader!css-loader'
             },
             {
                 test: /\.jade/,
-                loader: 'pug'
-            }
+                loader: 'pug-loader'
+            },
+            { test: /\.(glsl|vs|fs)$/, loader: 'shader-loader' },
         ]
     },
     devtool: "inline-source-map",
