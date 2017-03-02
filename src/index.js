@@ -1,6 +1,26 @@
 import "./index.scss"
 
-import "./demo/2/app"
+import "./demo/3/app"
+
+import Mat4 from "./Mat4/Mat4"
+
+// let m = new Mat4([
+//     1,2,3,4,
+//     5,6,7,8,
+//     9,10,11,12,
+//     13,14,15,16
+// ])
+// console.log(m.getArray());
+// m.transpose()
+// console.log(m.getArray());
+
+// m.print()
+//
+// m.transpose()
+// m.print()
+//
+// m.setRotate(10, 0, 0, 1)
+// m.print()
 
 // import util from "./webGL-util"
 //
