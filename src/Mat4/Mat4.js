@@ -21,12 +21,14 @@ export default class Mat4 {
                                   0,0,0,0,
                                   0,0,0,0,]
         this._count_transpose = 0
+        this.transpose()
     }
 
     getArray() {
-        if (this._count_transpose < 1 || this._count_transpose%2 === 0) {
-            console.warn("你可能忘了转置为*列优先*!");
-        }
+        // if (this._count_transpose < 1 || this._count_transpose%2 === 0) {
+        //     console.warn("你可能忘了转置为*列优先*!");
+        // }
+
         return new Float32Array(this.elements)
     }
 
@@ -53,12 +55,14 @@ export default class Mat4 {
     }
 
     print() {
+        this.transpose()
         console.log("START===========");
         console.log(this.elements.slice(0,4))
         console.log(this.elements.slice(4,8))
         console.log(this.elements.slice(8,12))
         console.log(this.elements.slice(12,16))
         console.log("END=============");
+        this.transpose()
     }
 
     setIdentity() {
@@ -78,6 +82,8 @@ export default class Mat4 {
             0,0,1,z,
             0,0,0,1,
         ]
+        // 直接修改elements的话不会运行构造函数里的自动转置
+        this.transpose()
         return this
     }
 
@@ -163,13 +169,10 @@ export default class Mat4 {
             e[15] = 1;
         }
 
-        this.transpose()
         return this
     }
 
     mult(other) {
-        this.transpose()
-        other.transpose()
         // 缓存
         let e = this.elements
         let a = this.elements
@@ -194,8 +197,6 @@ export default class Mat4 {
             e[i+8]  = ai0 * b[8]  + ai1 * b[9]  + ai2 * b[10] + ai3 * b[11]
             e[i+12] = ai0 * b[12] + ai1 * b[13] + ai2 * b[14] + ai3 * b[15]
         }
-        this.transpose()
-        other.transpose()
 
         return this
     }
@@ -215,22 +216,26 @@ export default class Mat4 {
         // -Z轴(视线方向)
         let ZRev = center.sub(eye)
         let Z = ZRev.getOpp().unit()
+        // console.log(Z);
         // X轴
         let X = Z.cross(up).getOpp().unit()
+        // console.log(X);
         // Y轴
         let Y = Z.cross(X).unit()
+        // console.log(Y);
 
         // TODO: 检查不能有任何一个轴为0
         //       即: eye&center不能重合, 视线不能与up重合
-
         let rotateMatrix = new Mat4([
-            X.x, Y.x, Z.x, 0,
-            X.y, Y.y, Z.y, 0,
-            X.z, Y.z, Z.z, 0,
+            X.x, Y.x, -Z.x, 0,
+            X.y, Y.y, -Z.y, 0,
+            X.z, Y.z, -Z.z, 0,
             0,   0,   0,   1,
         ])
+        // 求逆(正交矩阵inverse(A) = transpose(A))
+        let rotateMatrixRev = rotateMatrix.transpose()
 
-        return rotateMatrix.mult(translateRev)
+        return rotateMatrixRev.mult(translateRev)
     }
 
     // _setLookAt (eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ) {
@@ -284,19 +289,19 @@ export default class Mat4 {
     //   e[14] = 0;
     //   e[15] = 1;
     //
-    // //   return this
+    //   console.log(this);
+    //
+    //   return this
     //   // Translate.
-    //   return this.translate(-eyeX, -eyeY, -eyeZ);
+    // //   return this._translate(-eyeX, -eyeY, -eyeZ);
     // }
     //
-    // translate (x, y, z) {
-    //   this.transpose()
+    // _translate (x, y, z) {
     //   var e = this.elements;
     //   e[12] += e[0] * x + e[4] * y + e[8]  * z;
     //   e[13] += e[1] * x + e[5] * y + e[9]  * z;
     //   e[14] += e[2] * x + e[6] * y + e[10] * z;
     //   e[15] += e[3] * x + e[7] * y + e[11] * z;
-    //   this.transpose()
     //   return this;
     // }
 }

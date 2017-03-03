@@ -13,14 +13,10 @@ gl.useProgram(shaderProgram)
 // ** 传入带偏移的ArrayBugger
 let vertices = new Float32Array([
     // x, y, s, t
-    // .5,  .5,  1.0,  1.0,
-    // .5,  -.5, 1.0,  -1.0,
-    // -.5, -.5, -1.0, -1.0,
-    // -.5, .5,  -1.0, 1.0,
-    -0.5,  0.5,   0.5, 0.5,
+    -0.5,  0.5,   0.0, 1.0,
     -0.5, -0.5,   0.0, 0.0,
-     0.5,  0.5,   1.0, 1.0,
-    //  0.5, -0.,   1.0, 0.0,
+    0.5,  -0.5,   1.0, 0.0,
+    0.5,  0.5,   1.0, 1.0,
 ])
 let verticesBuffer = gl.createBuffer()
 gl.bindBuffer(gl.ARRAY_BUFFER, verticesBuffer)
@@ -29,19 +25,21 @@ gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
 let a_Position = gl.getAttribLocation(shaderProgram, "a_Position")
 let a_TexCoord = gl.getAttribLocation(shaderProgram, "a_TexCoord")
 
-console.log(a_Position, a_TexCoord);
-
 const FSIZE = vertices.BYTES_PER_ELEMENT
 gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 4*FSIZE, 0)
 gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, 4*FSIZE, 2*FSIZE)
 gl.enableVertexAttribArray(a_Position)
 gl.enableVertexAttribArray(a_TexCoord)
 
+// ** 传入视图矩阵
+const u_ViewMat = gl.getUniformLocation(shaderProgram, "u_ViewMat")
+// let viewMat = new Mat4().setLookAt(0.2, 0.25, 0.25, 0, 0, 0, 0, 1, 0)
+// // let viewMat = new Mat4().setLookAt(0, 0, 0.25, 0, 0, 0, 0, 1, 0)
+// gl.uniformMatrix4fv(u_ViewMat, false, viewMat.transpose().getArray())
+
 // ** 传入纹理
 let texture = gl.createTexture()
 let u_Sampler = gl.getUniformLocation(shaderProgram, "u_Sampler")
-
-console.log(u_Sampler);
 
 import img_src from "./pattern.png"
 console.log(img_src);
@@ -62,11 +60,35 @@ img.onload = () => {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img)
     // 讲0号纹理传递给着色器
     gl.uniform1i(u_Sampler, 0)
-    gl.clear(gl.COLOR_BUFFER_BIT)
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 3)
+    // gl.clear(gl.COLOR_BUFFER_BIT)
+    // gl.drawArrays(gl.TRIANGLE_FAN, 0, 4)
+
+    let x = 0.001
+    let y = 0.001
+    let z = 0.001
+    // let viewMat = new Mat4().setLookAt(x, y, z, 0, 0, 0, 0, 1, 0)
+    // // let viewMat2 = new Mat4()._setLookAt(x, y, z, 0, 0, 0, 0, 1, 0)
+    // // let viewMat = new Mat4().setLookAt(0, 0, 0.25, 0, 0, 0, 0, 1, 0)
+    // gl.uniformMatrix4fv(u_ViewMat, false, viewMat.getArray())
+    // gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT)
+    // gl.drawArrays(gl.TRIANGLE_FAN, 0, 4)
+    function draw() {
+        requestAnimationFrame(draw)
+        x += 0.00001
+        y += 0.00001
+        // z += 0.001
+        let viewMat = new Mat4().setLookAt(x, y, z, 0, 0, 0, 0, 1, 0)
+        // let viewMat = new Mat4().setLookAt(0, 0, 0.25, 0, 0, 0, 0, 1, 0)
+        gl.uniformMatrix4fv(u_ViewMat, false, viewMat.getArray())
+        gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT)
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4)
+    }
+
+    draw()
 }
 img.src = img_src
 
+// let t0 = new Mat4().setLookAt(-1, -2, 3, 4, 5, -6, 1, 1, 1)
 // let t1 = new Mat4()._setLookAt(-1, -2, 3, 4, 5, -6, 1, 1, 1)
 // console.log(t0);
 // console.log(t1);
@@ -83,11 +105,3 @@ img.src = img_src
 // let t4 = new Mat4().setTranslate(1,2,3)
 // let t5 = t2.mult(t4)
 // console.log(t5);
-
-// function draw() {
-//     // requestAnimationFrame(draw)
-//     gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT)
-//     gl.drawArrays(gl.TRIANGLE_FAN, 0, 4)
-// }
-//
-// draw()

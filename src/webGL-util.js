@@ -24,9 +24,10 @@ export default {
             // 设置清除颜色为黑色，不透明
             gl.clearColor(0.0, 0.0, 0.0, 1.0);
             // 开启“深度测试”, Z-缓存
+            console.log("深度测试");
             gl.enable(gl.DEPTH_TEST);
             // 设置深度测试，近的物体遮挡远的物体
-            gl.depthFunc(gl.LEQUAL);
+            // gl.depthFunc(gl.LESS);
             // 清除颜色和深度缓存
             gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
         }
