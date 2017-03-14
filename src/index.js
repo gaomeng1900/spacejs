@@ -1,6 +1,6 @@
 import "./index.scss"
 
-import "./demo/6_1/app"
+import "./demo/7_1/app"
 
 import Mat4 from "./Mat4/Mat4"
 

@@ -226,10 +226,12 @@ export default class Mat4 {
 
         // TODO: 检查不能有任何一个轴为0
         //       即: eye&center不能重合, 视线不能与up重合
+
+        // 注意这里的XYZ已经时右手系了, 如果不是的话需要翻转Y
         let rotateMatrix = new Mat4([
-            X.x, Y.x, -Z.x, 0,
-            X.y, Y.y, -Z.y, 0,
-            X.z, Y.z, -Z.z, 0,
+            X.x, Y.x, Z.x, 0,
+            X.y, Y.y, Z.y, 0,
+            X.z, Y.z, Z.z, 0,
             0,   0,   0,   1,
         ])
         // 求逆(正交矩阵inverse(A) = transpose(A))
@@ -247,113 +249,180 @@ export default class Mat4 {
         this.elements = [
             2*wR, 0, 0, -(right+left)*wR,
             0, 2*hR, 0, -(top+bottom)*hR,
-            0, 0, -2*dR, -(far+near)*dR,
+            0, 0, -2*dR, -(far+near)*dR, // dR是负的
             0, 0, 0, 1,
         ]
         this.transpose()
         return this
     }
 
-    // _setOrtho(left, right, bottom, top, near, far) {
-    //   var e, rw, rh, rd;
+    /**
+     * 透视投影
+     * @method setPerspective
+     * @param  {Number}  fov    上下视角
+     * @param  {Number}  aspect 宽高比
+     * @param  {Number}  near
+     * @param  {Number}  far
+     */
+    setPerspective(fov, aspect, near, far) {
+        let a = Math.tan(Math.PI*fov/180/2)
+        this.elements = [
+            1/(aspect*a), 0, 0, 0,
+            0, 1/a, 0, 0,
+            0, 0, -(far+near)/(far-near), -(2*far*near)/(far-near),
+            0, 0, -1, 0,
+        ]
+        this.transpose()
+        return this
+    }
+
+    _setPerspective(fovy, aspect, near, far) {
+      var e, rd, s, ct;
+
+      if (near === far || aspect === 0) {
+        throw 'null frustum';
+      }
+      if (near <= 0) {
+        throw 'near <= 0';
+      }
+      if (far <= 0) {
+        throw 'far <= 0';
+      }
+
+      fovy = Math.PI * fovy / 180 / 2;
+      s = Math.sin(fovy);
+      if (s === 0) {
+        throw 'null frustum';
+      }
+
+      rd = 1 / (far - near);
+      ct = Math.cos(fovy) / s;
+
+      e = this.elements;
+
+      e[0]  = ct / aspect;
+      e[1]  = 0;
+      e[2]  = 0;
+      e[3]  = 0;
+
+      e[4]  = 0;
+      e[5]  = ct;
+      e[6]  = 0;
+      e[7]  = 0;
+
+      e[8]  = 0;
+      e[9]  = 0;
+      e[10] = -(far + near) * rd;
+      e[11] = -1;
+
+      e[12] = 0;
+      e[13] = 0;
+      e[14] = -2 * near * far * rd;
+      e[15] = 0;
+
+      return this;
+    }
+
+    _setOrtho(left, right, bottom, top, near, far) {
+      var e, rw, rh, rd;
+
+      if (left === right || bottom === top || near === far) {
+        throw 'null frustum';
+      }
+
+      rw = 1 / (right - left);
+      rh = 1 / (top - bottom);
+      rd = 1 / (far - near);
+
+      e = this.elements;
+
+      e[0]  = 2 * rw;
+      e[1]  = 0;
+      e[2]  = 0;
+      e[3]  = 0;
+
+      e[4]  = 0;
+      e[5]  = 2 * rh;
+      e[6]  = 0;
+      e[7]  = 0;
+
+      e[8]  = 0;
+      e[9]  = 0;
+      e[10] = -2 * rd;
+      e[11] = 0;
+
+      e[12] = -(right + left) * rw;
+      e[13] = -(top + bottom) * rh;
+      e[14] = -(far + near) * rd;
+      e[15] = 1;
+
+      return this;
+    }
     //
-    //   if (left === right || bottom === top || near === far) {
-    //     throw 'null frustum';
-    //   }
-    //
-    //   rw = 1 / (right - left);
-    //   rh = 1 / (top - bottom);
-    //   rd = 1 / (far - near);
-    //
-    //   e = this.elements;
-    //
-    //   e[0]  = 2 * rw;
-    //   e[1]  = 0;
-    //   e[2]  = 0;
-    //   e[3]  = 0;
-    //
-    //   e[4]  = 0;
-    //   e[5]  = 2 * rh;
-    //   e[6]  = 0;
-    //   e[7]  = 0;
-    //
-    //   e[8]  = 0;
-    //   e[9]  = 0;
-    //   e[10] = -2 * rd;
-    //   e[11] = 0;
-    //
-    //   e[12] = -(right + left) * rw;
-    //   e[13] = -(top + bottom) * rh;
-    //   e[14] = -(far + near) * rd;
-    //   e[15] = 1;
-    //
-    //   return this;
-    // }
-    //
-    // _setLookAt (eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ) {
-    //   var e, fx, fy, fz, rlf, sx, sy, sz, rls, ux, uy, uz;
-    //
-    //   fx = centerX - eyeX;
-    //   fy = centerY - eyeY;
-    //   fz = centerZ - eyeZ;
-    //
-    //   // Normalize f.
-    //   rlf = 1 / Math.sqrt(fx*fx + fy*fy + fz*fz);
-    //   fx *= rlf;
-    //   fy *= rlf;
-    //   fz *= rlf;
-    //
-    //   // Calculate cross product of f and up.
-    //   sx = fy * upZ - fz * upY;
-    //   sy = fz * upX - fx * upZ;
-    //   sz = fx * upY - fy * upX;
-    //
-    //   // Normalize s.
-    //   rls = 1 / Math.sqrt(sx*sx + sy*sy + sz*sz);
-    //   sx *= rls;
-    //   sy *= rls;
-    //   sz *= rls;
-    //
-    //   // Calculate cross product of s and f.
-    //   ux = sy * fz - sz * fy;
-    //   uy = sz * fx - sx * fz;
-    //   uz = sx * fy - sy * fx;
-    //
-    //   // Set to this.
-    //   e = this.elements;
-    //   e[0] = sx;
-    //   e[1] = ux;
-    //   e[2] = -fx;
-    //   e[3] = 0;
-    //
-    //   e[4] = sy;
-    //   e[5] = uy;
-    //   e[6] = -fy;
-    //   e[7] = 0;
-    //
-    //   e[8] = sz;
-    //   e[9] = uz;
-    //   e[10] = -fz;
-    //   e[11] = 0;
-    //
-    //   e[12] = 0;
-    //   e[13] = 0;
-    //   e[14] = 0;
-    //   e[15] = 1;
-    //
+    _setLookAt (eyeX, eyeY, eyeZ, centerX, centerY, centerZ, upX, upY, upZ) {
+      var e, fx, fy, fz, rlf, sx, sy, sz, rls, ux, uy, uz;
+
+      fx = centerX - eyeX;
+      fy = centerY - eyeY;
+      fz = centerZ - eyeZ;
+
+      // Normalize f.
+      rlf = 1 / Math.sqrt(fx*fx + fy*fy + fz*fz);
+      fx *= rlf;
+      fy *= rlf;
+      fz *= rlf;
+
+      // Calculate cross product of f and up.
+      sx = fy * upZ - fz * upY;
+      sy = fz * upX - fx * upZ;
+      sz = fx * upY - fy * upX;
+
+      // Normalize s.
+      rls = 1 / Math.sqrt(sx*sx + sy*sy + sz*sz);
+      sx *= rls;
+      sy *= rls;
+      sz *= rls;
+
+      // Calculate cross product of s and f.
+      ux = sy * fz - sz * fy;
+      uy = sz * fx - sx * fz;
+      uz = sx * fy - sy * fx;
+
+      // Set to this.
+      e = this.elements;
+      e[0] = sx;
+      e[1] = ux;
+      e[2] = -fx;
+      e[3] = 0;
+
+      e[4] = sy;
+      e[5] = uy;
+      e[6] = -fy;
+      e[7] = 0;
+
+      e[8] = sz;
+      e[9] = uz;
+      e[10] = -fz;
+      e[11] = 0;
+
+      e[12] = 0;
+      e[13] = 0;
+      e[14] = 0;
+      e[15] = 1;
+
     //   console.log(this);
-    //
+
     //   return this
-    //   // Translate.
-    // //   return this._translate(-eyeX, -eyeY, -eyeZ);
-    // }
-    //
-    // _translate (x, y, z) {
-    //   var e = this.elements;
-    //   e[12] += e[0] * x + e[4] * y + e[8]  * z;
-    //   e[13] += e[1] * x + e[5] * y + e[9]  * z;
-    //   e[14] += e[2] * x + e[6] * y + e[10] * z;
-    //   e[15] += e[3] * x + e[7] * y + e[11] * z;
-    //   return this;
-    // }
+      // Translate.
+      return this._translate(-eyeX, -eyeY, -eyeZ);
+    }
+
+    _translate (x, y, z) {
+      var e = this.elements;
+      e[12] += e[0] * x + e[4] * y + e[8]  * z;
+      e[13] += e[1] * x + e[5] * y + e[9]  * z;
+      e[14] += e[2] * x + e[6] * y + e[10] * z;
+      e[15] += e[3] * x + e[7] * y + e[11] * z;
+      return this;
+    }
 }
