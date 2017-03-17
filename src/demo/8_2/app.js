@@ -45,7 +45,6 @@ gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
 
 // 环境光
 const uAmbientLight = gl.getUniformLocation(shaderProgram, "uAmbientLight")
-console.log(uAmbientLight);
 gl.uniform4f(uAmbientLight, 0.3, 0.3, 0.3, 1.0)
 
 // 点光源
@@ -61,7 +60,6 @@ const uNormalMat = gl.getUniformLocation(shaderProgram, "uNormalMat")
 
 // 高光
 const uViewPos = gl.getUniformLocation(shaderProgram, "uViewPos")
-console.log(uViewPos);
 
 const uShininess = gl.getUniformLocation(shaderProgram, "uShininess")
 gl.uniform1f(uShininess, 20.0)

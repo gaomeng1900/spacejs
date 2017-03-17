@@ -4,8 +4,8 @@ import Vec3 from "../../Vec/Vec3"
 
 import cube from "../obj/cube"
 
-import vs from "./s.vs"
-import fs from "./s.fs"
+import vs from "./shader.vs"
+import fs from "./shader.fs"
 
 const gl = util.initWebGL(document.getElementById("canvas"))
 
@@ -17,26 +17,25 @@ gl.useProgram(shaderProgram)
 let verticesBuffer = gl.createBuffer()
 gl.bindBuffer(gl.ARRAY_BUFFER, verticesBuffer)
 gl.bufferData(gl.ARRAY_BUFFER, cube.vertices, gl.STATIC_DRAW)
-let inputPosition = gl.getAttribLocation(shaderProgram, "inputPosition")
-console.log(inputPosition);
-gl.vertexAttribPointer(inputPosition, 3, gl.FLOAT, false, 0, 0)
-gl.enableVertexAttribArray(inputPosition)
+let aPosition = gl.getAttribLocation(shaderProgram, "aPosition")
+gl.vertexAttribPointer(aPosition, 3, gl.FLOAT, false, 0, 0)
+gl.enableVertexAttribArray(aPosition)
 
 // 法线
 let normals_buffer = gl.createBuffer()
 gl.bindBuffer(gl.ARRAY_BUFFER, normals_buffer)
 gl.bufferData(gl.ARRAY_BUFFER, cube.normals, gl.STATIC_DRAW)
-let inputNormal = gl.getAttribLocation(shaderProgram, "inputNormal")
-gl.vertexAttribPointer(inputNormal, 3, gl.FLOAT, false, 0, 0)
-gl.enableVertexAttribArray(inputNormal)
+let aNormal = gl.getAttribLocation(shaderProgram, "aNormal")
+gl.vertexAttribPointer(aNormal, 3, gl.FLOAT, false, 0, 0)
+gl.enableVertexAttribArray(aNormal)
 
 // 颜色
-// let colors_buffer = gl.createBuffer()
-// gl.bindBuffer(gl.ARRAY_BUFFER, colors_buffer)
-// gl.bufferData(gl.ARRAY_BUFFER, cube.colors, gl.STATIC_DRAW)
-// let aColor = gl.getAttribLocation(shaderProgram, "aColor")
-// gl.vertexAttribPointer(aColor, 3, gl.FLOAT, false, 0, 0)
-// gl.enableVertexAttribArray(aColor)
+let colors_buffer = gl.createBuffer()
+gl.bindBuffer(gl.ARRAY_BUFFER, colors_buffer)
+gl.bufferData(gl.ARRAY_BUFFER, cube.colors, gl.STATIC_DRAW)
+let aColor = gl.getAttribLocation(shaderProgram, "aColor")
+gl.vertexAttribPointer(aColor, 3, gl.FLOAT, false, 0, 0)
+gl.enableVertexAttribArray(aColor)
 
 // 面
 let indices =cube.indices
@@ -46,27 +45,27 @@ gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW)
 
 // 环境光
 const uAmbientLight = gl.getUniformLocation(shaderProgram, "uAmbientLight")
-// gl.uniform4f(uAmbientLight, 0.2, 0.2, 0.2, 1.0)
+gl.uniform4f(uAmbientLight, 0.3, 0.3, 0.3, 1.0)
 
 // 点光源
-const lightPos   = gl.getUniformLocation(shaderProgram, "lightPos")
-const specularColor = gl.getUniformLocation(shaderProgram, "specularColor")
-gl.uniform3f(lightPos, 2.0, 2.0, 2.0)
-gl.uniform3f(specularColor, 0.9, 0.9, 0.9)
+const uPointLightPos   = gl.getUniformLocation(shaderProgram, "uPointLightPos")
+const uPointLightColor = gl.getUniformLocation(shaderProgram, "uPointLightColor")
+gl.uniform3f(uPointLightPos, 2.0, 2.0, 2.0)
+gl.uniform4f(uPointLightColor, 0.9, 0.9, 0.9, 1.0)
 
 // 矩阵
-const modelview = gl.getUniformLocation(shaderProgram, "modelview")
-const projection = gl.getUniformLocation(shaderProgram, "projection")
-const normalMat = gl.getUniformLocation(shaderProgram, "normalMat")
+const uModelMat = gl.getUniformLocation(shaderProgram, "uModelMat")
+const uProjMat = gl.getUniformLocation(shaderProgram, "uProjMat")
+const uNormalMat = gl.getUniformLocation(shaderProgram, "uNormalMat")
 
 // 高光
-const uViewpos = gl.getUniformLocation(shaderProgram, "uViewpos")
-const shininessVal = gl.getUniformLocation(shaderProgram, "shininessVal")
-console.log(shininessVal);
-gl.uniform1f(shininessVal, 100.0)
+const uViewPos = gl.getUniformLocation(shaderProgram, "uViewPos")
+
+const uShininess = gl.getUniformLocation(shaderProgram, "uShininess")
+gl.uniform1f(uShininess, 20.0)
 
 let x = 0.0
-let y = 2.0
+let y = 0.0
 let z = 3.5
 let alpha = 0
 let da = 1
@@ -80,16 +79,16 @@ function draw() {
                              .mult(new Mat4().setRotate(alpha, 0, 1, 0))
                             //  .mult(new Mat4().setTranslate(1, 0, 0))
     // 模型逆转置矩阵
-    let _normalMat = new Mat4().setInverseOf(modelMat).transpose()
+    let normalMat = new Mat4().setInverseOf(modelMat).transpose()
     // 视图矩阵
     let viewMat  = new Mat4().setLookAt(x, y, z, 0, 0, 0, 0, 1, 0)
-    // gl.uniform3f(uViewpos, x, y, z)
+    gl.uniform3f(uViewPos, x, y, z)
     // 投影矩阵
     let projMat  = new Mat4().setPerspective(90, 1, 0.1, 20)
 
-    gl.uniformMatrix4fv(projection, false, projMat.mult(viewMat).mult(modelMat).getArray())
-    gl.uniformMatrix4fv(modelview, false, viewMat.mult(modelMat).getArray())
-    gl.uniformMatrix4fv(normalMat, false, _normalMat.getArray())
+    gl.uniformMatrix4fv(uModelMat, false, modelMat.getArray())
+    gl.uniformMatrix4fv(uProjMat, false, projMat.mult(viewMat).mult(modelMat).getArray())
+    gl.uniformMatrix4fv(uNormalMat, false, normalMat.getArray())
 
     gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT)
     gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_BYTE, 0)

@@ -15,46 +15,33 @@ uniform vec3  uViewPos;
 
 // phong
 void main() {
-    vec3 specularColor = vec3(1.0, 1.0, 1.0);
-    float shininessVal = 11.0;
-    float Ks = 1.0;
-
-    vec3 N = normalize(vNormal);
-    vec3 L = normalize(uPointLightPos - vPosition);
-
-    // Lambert's cosine law
-    float lambertian = max(dot(N, L), 0.0);
-
-    float specular = 0.0;
-
-    if(lambertian > 0.0) {
-      vec3 R = reflect(-L, N);      // Reflected light vector
-      vec3 V = normalize(uViewPos - vPosition); // Vector to viewer
-
-      // Compute the specular term
-      float specAngle = max(dot(R, V), 0.0);
-      specular = pow(specAngle, shininessVal);
-    }
-
-
+    // 自然光漫反射
     vec3 ambient = uAmbientLight.rgb * vColor.rgb;
-    gl_FragColor = vec4(Ks * specular * specularColor + ambient, 1.0);
 
+    // 由于经过了插值, 法线需要重新归一
+    vec3 normal        = normalize(vNormal);
+    vec3 pointLightDir = normalize(uPointLightPos - vPosition);
+    float nDotL        = max(dot(pointLightDir, normal), 0.0);
+    // 点光源漫反射
+    vec3 diffuse = uPointLightColor.rgb * vColor.rgb * nDotL;
 
-    // vec3 normal = normalize(vNormal);
-    // vec3 pointLightDir = normalize(uPointLightPos - vPosition);
-    // vec3 viewDir = normalize(uViewPos - vPosition);
-    //
-    // vec3 halfwayDir = normalize(pointLightDir + viewDir);
-    // float spec = pow(max(dot(normal, halfwayDir), 0.0), uShininess);
-    // vec3 specular = uPointLightColor.rgb * spec;
-    //
+    vec3 viewDir = normalize(uViewPos - vPosition);
+
+    // Blinn-Phong 着色, 相对于Phong性能更高, 更均匀
+    vec3 halfwayDir = normalize(pointLightDir + viewDir);
+    float spec = pow(max(dot(normal, halfwayDir), 0.0), uShininess);
+    // Phong 着色, 更真实?
     // // vec3 reflectanceRay = 2.0 * dot(normal, pointLightDir) * normal - pointLightDir;
-    // // float spec = pow(dot(reflectanceRay, viewDir), uShininess);
-    // // vec3 specular = uPointLightColor.rgb * spec;
-    //
-    // // float nDotL = max(dot(pointLightDir, normal), 0.0);
-    // // vec3 diffuse = uPointLightColor.rgb * vColor.rgb * nDotL;
-    // // gl_FragColor = vec4(diffuse + ambient, 1.0);
+    // vec3 reflectanceRay = reflect(-pointLightDir, normal);
+    // float spec = 0.0;
+    // if(nDotL > 0.0)
+    // {
+    //     spec = pow(max(dot(reflectanceRay, viewDir), 0.0), uShininess); // !!!KEY
+    // }
+    vec3 specular = uPointLightColor.rgb * spec;
+    gl_FragColor = vec4(diffuse + ambient + specular, 1.0);
     // gl_FragColor = vec4(specular, 1.0);
+    // gl_FragColor = vec4(reflectanceRay, 1.0);
+    // gl_FragColor = vec4(uPointLightColor);
+    // gl_FragColor = vec4(spec, 0.0, 0.0, 1.0);
 }

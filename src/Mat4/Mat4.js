@@ -11,7 +11,8 @@ import Vec3 from "../Vec/Vec3"
  * c1 c2 c3 c4
  * d1 d2 d3 d4
  *
- *
+ * 构造函数接受行优先矩阵, 然后转置为列优先,
+ * 数组里保存的一直是列优先矩阵
  */
 
 export default class Mat4 {
@@ -24,11 +25,8 @@ export default class Mat4 {
         this.transpose()
     }
 
+    // 获取Float32Array
     getArray() {
-        // if (this._count_transpose < 1 || this._count_transpose%2 === 0) {
-        //     console.warn("你可能忘了转置为*列优先*!");
-        // }
-
         return new Float32Array(this.elements)
     }
 
@@ -42,6 +40,7 @@ export default class Mat4 {
         return true
     }
 
+    // 转置
     transpose() {
         this._count_transpose ++
         let m = this.elements
@@ -54,6 +53,7 @@ export default class Mat4 {
         return this
     }
 
+    // 行优先 友好打印
     print() {
         this.transpose()
         console.log("START===========");
@@ -65,16 +65,18 @@ export default class Mat4 {
         this.transpose()
     }
 
+    // 单位矩阵
     setIdentity() {
         this.elements = [
             1,0,0,0,
             0,1,0,0,
             0,0,1,0,
-            0,0,0,1.
+            0,0,0,1,
         ]
         return this
     }
 
+    // 平移矩阵
     setTranslate(x, y, z) {
         this.elements = [
             1,0,0,x,
@@ -87,6 +89,7 @@ export default class Mat4 {
         return this
     }
 
+    // 缩放矩阵
     setScale(x, y, z) {
         this.elements = [
             x,0,0,0,
