@@ -3,7 +3,7 @@
  * author: Simon/Meng gaomeng1900@gmail.com
  */
 
-import Vec3 from "../Vec/Vec3"
+import Vec3 from "./Vec3"
 
 /**
  * a1 a2 a3 a4
@@ -28,6 +28,10 @@ export default class Mat4 {
     // 获取Float32Array
     getArray() {
         return new Float32Array(this.elements)
+    }
+
+    clone() {
+        return new Mat4(this.elements.slice()).transpose()
     }
 
     equalTo(mat4) {
@@ -229,6 +233,7 @@ export default class Mat4 {
 
         // TODO: 检查不能有任何一个轴为0
         //       即: eye&center不能重合, 视线不能与up重合
+        //       重合的话需要有处理方案
 
         // 注意这里的XYZ已经时右手系了, 如果不是的话需要翻转Y
         let rotateMatrix = new Mat4([

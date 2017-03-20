@@ -13,7 +13,7 @@ module.exports = {
     // 因为npm相对路径发生变化
     // @NOTE 使用绝对地址来避免潜在问题
     entry: {
-        index: [path.resolve("./src/index.js"), 'webpack-hot-middleware/client?reload=true'] // 热重载中间件
+        index: [path.resolve("./src/demo/index.js"), 'webpack-hot-middleware/client?reload=true'] // 热重载中间件
         // vendors: ['react', "react-dom"], // 第三方文件单独打包
     },
     output: {

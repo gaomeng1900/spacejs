@@ -34,7 +34,7 @@ app.use(require('webpack-hot-middleware')(compiler))
 // compit jade & route '/'to index.html
 app.get('/', (req, res)=>{
     console.log('visiting index')
-    var html = jade.renderFile(path.join(__dirname, 'src', 'index.jade'))
+    var html = jade.renderFile(path.join(__dirname, 'src', 'demo', 'index.jade'))
     res.writeHead(200,  { 'Content-Type': 'text/html charset=utf-8' })
     res.end(html)
 })
