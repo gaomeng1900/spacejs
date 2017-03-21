@@ -4,12 +4,12 @@ let renderer = new Space.Renderer({
     canvas: document.getElementById("canvas"),
     width: 500,
     height: 500,
-    clearColor: [0, 0, 0, 1]
+    clearColor: new Space.Color(0.5, 0.5, 0.5, 1)
 })
 
 // 相机
 let cam = new Space.Camera("perspective", 90, 1, 0.1, 100)//fov, aspect, near, far
-cam.pos.set(0, 0, 5)
+cam.pos.set(0, 0, 4)
 cam.up.set(0, 1, 0)
 cam.center.set(0, 0, 0)
 window.cam = cam
@@ -20,15 +20,18 @@ window.scene = scene
 
 // 光源
 let pLight = new Space.PointLight(new Space.Vec3(2.0, 2.0, 2.0),
-                                  [0.9, 0.9, 0.9, 1.0],
-                                  1.0) // intensity
-let aLight = new Space.AmbientLight([0.3, 0.3, 0.3, 1.0])
+                                  new Space.Color(0.9, 0.9, 0.9, 1.0))
+let aLight = new Space.AmbientLight(new Space.Color(0.5, 0.5, 0.5, 1.0))
 scene.add(pLight)
 scene.add(aLight)
 
 // 物体
 let cubeGeom = new Space.CubeGeom(5)
-let material = new Space.Material()
+import img_src from "./pattern.png"
+let material = new Space.BasicMaterial({
+    color: new Space.Color(1.0, .0, .0, 1.0), // texture加载成功之前显示颜色
+    map: new Space.Texture(img_src) // 加载之后自动更新
+})
 let cube0 = new Space.Mesh(cubeGeom, material)
 let cube1 = new Space.Mesh(cubeGeom, material)
 let cube2 = new Space.Mesh(cubeGeom, material)

@@ -8,9 +8,6 @@ export default class Scene {
         this.lights = []
         this.renderer = renderer
         this.gl = renderer.gl
-        // ELEMENT_ARRAY_BUFFER 的缓存
-        // TODO: 写这里好丑呀
-        this._elemArrayBuffer = renderer.gl.createBuffer()
     }
 
     add(...sths) {
@@ -23,10 +20,11 @@ export default class Scene {
         if (sth instanceof Obj) {
             this.objs.push(sth)
             // TODO: 在这里编译shader?
-            sth.shaderProgram = glUtil.makeShader(sth.vs, sth.fs, this.gl)
-            // buffer缓存, 避免重复创建buffer
-            // TODO: 然而挂这里是不是不太好看
-            sth.shaderProgram._buffers = {}
+            // 通过有没有map来决定使用的shader
+            // TODO: 要不要统一弄个空map, 取样会对性能造成多大的影响
+            sth.material.makeShader(this.gl, true) // 全部启用纹理
+            // sth.material.makeShader(this.gl, sth.material.map)
+            // sth.shaderProgram = glUtil.makeShader(sth.material.vs, sth.material.fs, this.gl)
         } else if (sth instanceof Light) {
             this.lights.push(sth)
         } else {

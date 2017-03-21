@@ -4,6 +4,8 @@ export default class CubeGeom extends Geom {
     constructor() {
         super()
 
+        this._name = "CubeGeom"
+
         this.drawMode = "TRIANGLES"
         this.drawCount = 36
         this.drawType = "UNSIGNED_BYTE"
@@ -26,15 +28,6 @@ export default class CubeGeom extends Geom {
             1.0,-1.0,-1.0,  -1.0,-1.0,-1.0,  -1.0, 1.0,-1.0,   1.0, 1.0,-1.0  // v4-v7-v6-v5 back
         ])
 
-        this.colors = new Float32Array([    // Colors
-            1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v0-v1-v2-v3 front
-            1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v0-v3-v4-v5 right
-            1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v0-v5-v6-v1 up
-            1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v1-v6-v7-v2 left
-            1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0,     // v7-v4-v3-v2 down
-            1, 0, 0,   1, 0, 0,   1, 0, 0,  1, 0, 0　    // v4-v7-v6-v5 back
-        ])
-
         this.normals = new Float32Array([    // Normal
             0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,   0.0, 0.0, 1.0,  // v0-v1-v2-v3 front
             1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,   1.0, 0.0, 0.0,  // v0-v3-v4-v5 right
@@ -51,6 +44,17 @@ export default class CubeGeom extends Geom {
             12,13,14,  12,14,15,    // left
             16,17,18,  16,18,19,    // down
             20,21,22,  20,22,23     // back
+        ])
+
+        let map_of_a_face = [1.0, 0.0,  0.0, 0.0,  0.0, 1.0,  1.0, 1.0]
+
+        this.uvMap = new Float32Array([
+            ...map_of_a_face,
+            ...map_of_a_face,
+            ...map_of_a_face,
+            ...map_of_a_face,
+            ...map_of_a_face,
+            ...map_of_a_face,
         ])
     }
 
