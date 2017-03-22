@@ -37,6 +37,7 @@ let cube0 = new Space.Mesh(cubeGeom, material)
 let cube1 = new Space.Mesh(cubeGeom, material)
 let cube2 = new Space.Mesh(cubeGeom, material)
 cube0.scale(1, 2, 3)
+cube0.pos.set(4, 4, -2)
 cube1.pos.set(2, 2, -2)
 cube2.pos.set(-5, 5, -10)
 scene.add(cube0, cube1, cube2)
@@ -47,11 +48,16 @@ custom.pos.set(-5, 2, -2)
 
 let material1 = new Space.BasicMaterial({color: new Space.Color(1.0, .0, .0, 1.0)})
 let cone0 = new Space.Mesh(new Space.ConeGeom(1, 5, 3), material)
-let cone1 = new Space.Mesh(new Space.ConeGeom(3, 100, 4), material1)
+let cone1 = new Space.Mesh(new Space.ConeGeom(2, 50, 3), material1)
 cone0.pos.set(5, -2, 0)
 cone1.pos.set(-2, -4, -3)
 scene.add( cone0, cone1 )
 
+import earth_img from "./earth-0.jpg"
+let material2 = new Space.BasicMaterial({map: new Space.Texture(earth_img)})
+let sphere0 = new Space.Mesh(new Space.SphereGeom(2, 18, 18), material2)
+sphere0.pos.set(0, -1, 0)
+scene.add(sphere0)
 
 // 渲染
 const render = ()=>{
@@ -75,8 +81,19 @@ const render = ()=>{
     cone0.rotateX(1)
     cone0.rotateZ(0.6)
 
-    cone1.rotateX(1)
+    cone1.rotateZ(1)
+
+    // sphere0.rotateX(1)
+    sphere0.rotateY(1)
 
     renderer.render(scene, cam)
 }
 render()
+
+window._print = (array, count) => {
+    let lines = Math.ceil(array.length / count)
+    for (var i = 0; i < lines; i++) {
+        let out = array.slice(i * count, (i+1) * count)
+        console.log(out);
+    }
+}

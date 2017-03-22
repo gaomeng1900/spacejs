@@ -4,6 +4,7 @@ import Vec3 from "./Math/Vec3"
 import Color from "./Math/Color"
 import CubeGeom from "./Geom/CubeGeom"
 import ConeGeom from "./Geom/ConeGeom"
+import SphereGeom from "./Geom/SphereGeom"
 import Scene from "./Scene"
 import PointLight from "./Light/PointLight"
 import AmbientLight from "./Light/AmbientLight"
@@ -112,6 +113,7 @@ export default {
     AmbientLight: AmbientLight,
     CubeGeom: CubeGeom,
     ConeGeom: ConeGeom,
+    SphereGeom: SphereGeom,
     Material: Material,
     BasicMaterial: BasicMaterial,
     Texture: Texture,

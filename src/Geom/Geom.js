@@ -17,7 +17,7 @@ export default class Geom {
         this.faces = []
         // this.faceUvs = []
     }
-    update() {
+    initFromFaces() {
         let _vertices = this.faces.reduce((acc, face) => {
             return acc.concat(face.getAbc())
         }, [])

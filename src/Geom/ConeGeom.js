@@ -39,6 +39,6 @@ export default class ConeGeom extends Geom {
             this.faces.push(face)
         }
 
-        this.update()
+        this.initFromFaces()
     }
 }

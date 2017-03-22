@@ -1,6 +1,9 @@
+import uuid from "uuid"
+
 // !!! 全局只需要一套Buffer, 可以避免重复创建
 const buffers = {}
-const textures = {}
+let COLOR_TEXTURE
+const texUnit = []
 
 export default {
     initWebGL: (canvas, width, height, clearColor) => {
@@ -86,13 +89,13 @@ export default {
     },
 
     bindElemArrayBuffer(gl, data) {
-        let buffer = gl.createBuffer()
-        // if (buffers["ELEMENT_ARRAY_BUFFER"]) {
-        //     buffer = buffers["ELEMENT_ARRAY_BUFFER"]
-        // } else {
-        //     buffer = gl.createBuffer()
-        //     buffers["ELEMENT_ARRAY_BUFFER"] = buffer
-        // }
+        let buffer
+        if (buffers["ELEMENT_ARRAY_BUFFER"]) {
+            buffer = buffers["ELEMENT_ARRAY_BUFFER"]
+        } else {
+            buffer = gl.createBuffer()
+            buffers["ELEMENT_ARRAY_BUFFER"] = buffer
+        }
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer)
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, gl.STATIC_DRAW)
     },
@@ -119,37 +122,39 @@ export default {
             map.glTexture = gl.createTexture()
         }
         texture = map.glTexture
-        // TODO:
-        // !!!!这里需要一个texture缓存, 不然img decode消耗较大
-        // // 缓存 buffer
-        // let texture
-        // if (textures[name]) {
-        //     texture = textures[name]
-        // } else {
-        //     texture = gl.createTexture()
-        //     textures[name] = texture
-        // }
-        // 开启y轴翻转
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
-        // 开启0号纹理单元
-        gl.activeTexture(gl.TEXTURE0)
-        // 绑定纹理对象
-        gl.bindTexture(gl.TEXTURE_2D, texture)
-        // 配置纹理参数
-        // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-        // 配置纹理图像
-        gl.texImage2D(gl.TEXTURE_2D, // TODO: 开销略大
-                      0,
-                      gl.RGBA,
-                      gl.RGBA,
-                      gl.UNSIGNED_BYTE,
-                      map.img
-                    )
-        // 讲0号纹理传递给着色器
-        gl.uniform1i(s, 0)
+
+        if (! texUnit.includes(map.uuid)) { // NOTE:可能需要Polyfill
+            // TODO: uuid放到material里面显然更好
+            // NOTE: 这里的缓存机制, 超过七个纹理时只对最后一个单元操作
+            // 这里需要一个更合理的缓存机制, 比方说计数来决定谁留在单元里
+            map.uuid = uuid()
+            if (texUnit.length > 7) {
+                texUnit.pop() // 缓存7个
+            }
+            texUnit.push(map.uuid)
+            map.unitNum = texUnit.length
+
+            // 开启y轴翻转
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
+            // 开启0号纹理单元
+            gl.activeTexture(gl["TEXTURE" + map.unitNum])
+            // 绑定纹理对象
+            gl.bindTexture(gl.TEXTURE_2D, texture)
+            // 配置纹理参数
+            // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+            // 配置纹理图像
+            gl.texImage2D(gl.TEXTURE_2D, // TODO: 开销略大
+                          0,
+                          gl.RGBA,
+                          gl.RGBA,
+                          gl.UNSIGNED_BYTE,
+                          map.img
+                        )
+        }
+        gl.uniform1i(s, map.unitNum)
     },
 
     bindTextureWithColor(gl, shaderProgram, name, color) {
@@ -158,13 +163,11 @@ export default {
             console.error("无法定位 uniform")
             return
         }
-        let texture
-        if (textures[name]) {
-            texture = textures[name]
-        } else {
-            texture = gl.createTexture()
-            textures[name] = texture
+        // 缓存 buffer
+        if (!COLOR_TEXTURE) {
+            COLOR_TEXTURE = gl.createTexture()
         }
+        let texture = COLOR_TEXTURE
         gl.activeTexture(gl.TEXTURE0)
         gl.bindTexture(gl.TEXTURE_2D, texture)
         gl.texImage2D(gl.TEXTURE_2D,

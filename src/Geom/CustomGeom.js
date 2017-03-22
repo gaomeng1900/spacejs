@@ -48,6 +48,6 @@ export default class CustomGeom extends Geom {
         )
         this.faces.push(face)
 
-        this.update()
+        this.initFromFaces()
     }
 }

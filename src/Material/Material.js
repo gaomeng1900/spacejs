@@ -1,4 +1,5 @@
 import Color from "../Math/Color"
+import uuid from "uuid"
 
 const conf_default = {
     color: new Color(1.0, .0, .0, 1.0)
@@ -16,6 +17,8 @@ export default class Material {
         this.vs
         this.fs
         this.shaderProgram
+
+        this.uuid = uuid()
     }
 
     makeShader(gl) {
