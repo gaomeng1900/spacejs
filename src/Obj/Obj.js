@@ -8,11 +8,7 @@ export default class Obj {
         this.material = material
 
         this.pos = new Vec3() // 其实就是 translate
-        // this.vertices = new Float32Array([])
-        // this.normals  = new Float32Array([])
-        // this.indices  = new Uint8Array([])  // 直接用geom里的
 
-        // this.translateMat = new Mat4().setTranslate(0, 0, 0)
         this.rotateMat = new Mat4().setRotate(0, 0, 1, 0)
         this.scaleMat = new Mat4().setScale(1, 1, 1)
         this.mMat = new Mat4()
