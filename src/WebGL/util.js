@@ -69,19 +69,10 @@ export default {
             return
         }
         // 缓存 buffer
-        let buffer
-        if (buffers[name]) {
-            buffer = buffers[name]
-        } else {
-            buffer = gl.createBuffer()
-            buffers[name] = buffer
+        if (! buffers[name]) {
+            buffers[name] = gl.createBuffer()
         }
-        // if (shaderProgram._buffers[name]) {
-        //     buffer = shaderProgram._buffers[name]
-        // } else {
-        //     buffer = gl.createBuffer()
-        //     shaderProgram._buffers[name] = buffer
-        // }
+        let buffer = buffers[name]
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
         gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW)
         gl.vertexAttribPointer(a, n, gl.FLOAT, false, 0, 0)
@@ -108,6 +99,16 @@ export default {
         }
         let n = data.length
         gl["uniform"+n+"f"](u, ...data)
+    },
+
+    anf(gl, shaderProgram, name, ...data) {
+        let a = gl.getAttribLocation(shaderProgram, name)
+        if (a < 0 ) {
+            console.error("无法定位 attribute")
+            return
+        }
+        let n = data.length
+        gl["vertexAttrib"+n+"f"](a, ...data)
     },
 
     bindTexture(gl, shaderProgram, name, map) {

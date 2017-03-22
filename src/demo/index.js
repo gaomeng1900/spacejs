@@ -2,8 +2,8 @@ import Space from "../Space"
 // GL 渲染器
 let renderer = new Space.Renderer({
     canvas: document.getElementById("canvas"),
-    width: 500,
-    height: 500,
+    width: 700,
+    height: 700,
     clearColor: new Space.Color(0.5, 0.5, 0.5, 1)
 })
 
@@ -55,9 +55,23 @@ scene.add( cone0, cone1 )
 
 import earth_img from "./earth-0.jpg"
 let material2 = new Space.BasicMaterial({map: new Space.Texture(earth_img)})
-let sphere0 = new Space.Mesh(new Space.SphereGeom(2, 18, 18), material2)
-sphere0.pos.set(0, -1, 0)
+let sphere0 = new Space.Mesh(new Space.SphereGeom(1.5, 18, 18), material2)
+sphere0.pos.set(-1, -1, 0)
 scene.add(sphere0)
+
+let plane0 = new Space.Mesh(new Space.PlaneGeom(2, 1), material2)
+plane0.pos.set(3, -3, 0)
+scene.add(plane0)
+
+let keyPoints = [
+    new Space.Vec3(0, 0, 0),
+    new Space.Vec3(3, 3, 3),
+    new Space.Vec3(3, -3, 0),
+]
+let lineMaterial = new Space.LineMaterial({color: new Space.Color(1, 1, 0, 1)})
+let line0 = new Space.Line(new Space.LineGeom(keyPoints), lineMaterial)
+scene.add(line0)
+
 
 // 渲染
 const render = ()=>{
@@ -85,6 +99,13 @@ const render = ()=>{
 
     // sphere0.rotateX(1)
     sphere0.rotateY(1)
+
+    plane0.rotateY(2)
+    plane0.rotateX(2)
+
+    line0.rotateX(1)
+    line0.rotateY(1)
+    line0.rotateZ(1)
 
     renderer.render(scene, cam)
 }
