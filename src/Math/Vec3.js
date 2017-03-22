@@ -11,6 +11,10 @@ export default class Vec3 {
         this.z = z
     }
 
+    getArray() {
+        return [this.x, this.y, this.z]
+    }
+
     // 获取反向
     getOpp() {
         return new Vec3(-this.x, -this.y, -this.z)

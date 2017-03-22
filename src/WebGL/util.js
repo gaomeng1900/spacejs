@@ -35,6 +35,10 @@ export default {
             gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT)
         }
 
+        // NOTE: 启用这个插件,
+        // 来让 draw elements 支持 UNSIGNED_INT, 传Uint32入Array
+        gl.getExtension("OES_element_index_uint")
+
         return gl
     },
 
@@ -82,13 +86,13 @@ export default {
     },
 
     bindElemArrayBuffer(gl, data) {
-        let buffer
-        if (buffers["ELEMENT_ARRAY_BUFFER"]) {
-            buffer = buffers["ELEMENT_ARRAY_BUFFER"]
-        } else {
-            buffer = gl.createBuffer()
-            buffers["ELEMENT_ARRAY_BUFFER"] = buffer
-        }
+        let buffer = gl.createBuffer()
+        // if (buffers["ELEMENT_ARRAY_BUFFER"]) {
+        //     buffer = buffers["ELEMENT_ARRAY_BUFFER"]
+        // } else {
+        //     buffer = gl.createBuffer()
+        //     buffers["ELEMENT_ARRAY_BUFFER"] = buffer
+        // }
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer)
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, gl.STATIC_DRAW)
     },
@@ -134,7 +138,8 @@ export default {
         // 配置纹理参数
         // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-        // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
         // 配置纹理图像
         gl.texImage2D(gl.TEXTURE_2D, // TODO: 开销略大
                       0,

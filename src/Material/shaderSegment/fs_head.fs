@@ -1,4 +1,5 @@
 precision mediump float;
+precision mediump int;
 varying vec4 vColor;
 varying vec3 vNormal;
 varying vec3 vPosition;

@@ -3,6 +3,7 @@ import Mat4 from "./Math/Mat4"
 import Vec3 from "./Math/Vec3"
 import Color from "./Math/Color"
 import CubeGeom from "./Geom/CubeGeom"
+import ConeGeom from "./Geom/ConeGeom"
 import Scene from "./Scene"
 import PointLight from "./Light/PointLight"
 import AmbientLight from "./Light/AmbientLight"
@@ -11,7 +12,9 @@ import BasicMaterial from "./Material/BasicMaterial"
 import Texture from "./Material/Texture"
 import Mesh from "./Obj/Mesh/Mesh"
 import Camera from "./Camera"
-// import * from "./util"
+
+// test
+import CustomGeom from "./Geom/CustomGeom"
 
 const renderer_conf_default = {
     canvas: document.createElement("canvas"),
@@ -56,8 +59,8 @@ class Renderer {
 
             // 颜色 与 贴图之类的
             // glUtil.bindArrayBuffer(gl, shaderProgram, "aColor", geom.colors)
+            glUtil.bindArrayBuffer(gl, shaderProgram, "aTexCoord", geom.uvMap, 2)
             if (material.map && material.map.ready) {
-                glUtil.bindArrayBuffer(gl, shaderProgram, "aTexCoord", geom.uvMap, 2)
                 glUtil.bindTexture(gl, shaderProgram, "uSampler", material.map)
             } else {
                 glUtil.bindTextureWithColor(gl, shaderProgram, "uSampler", material.color)
@@ -65,7 +68,7 @@ class Renderer {
 
 
             // 面
-            glUtil.bindElemArrayBuffer(gl, geom.indices, scene._elemArrayBuffer)
+            glUtil.bindElemArrayBuffer(gl, geom.indices)
 
             // 光
             scene.lights.forEach(light => {
@@ -108,8 +111,12 @@ export default {
     PointLight: PointLight,
     AmbientLight: AmbientLight,
     CubeGeom: CubeGeom,
+    ConeGeom: ConeGeom,
     Material: Material,
     BasicMaterial: BasicMaterial,
     Texture: Texture,
     Mesh: Mesh,
+
+    // test
+    CustomGeom: CustomGeom,
 }

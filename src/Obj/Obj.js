@@ -31,6 +31,10 @@ export default class Obj {
         this.rotateMat = new Mat4().setRotate(alpha, 0, 0, 1).mult(this.rotateMat)
     }
 
+    scale(x, y, z) {
+        this.scaleMat = new Mat4().setScale(x, y, z)
+    }
+
     updateMat() {
         let _translateMat = new Mat4().setTranslate(this.pos.x, this.pos.y, this.pos.z)
         let _scaleMat = this.scaleMat.clone()
