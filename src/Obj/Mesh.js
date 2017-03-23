@@ -28,7 +28,7 @@ export default class Mesh extends Obj{
         if (material.map && material.map.ready) {
             glUtil.bindTexture(gl, shaderProgram, "uSampler", material.map)
         } else {
-            glUtil.unf(gl, shaderProgram, "aColor", ...material.color.getArray())
+            glUtil.anf(gl, shaderProgram, "aColor", ...material.color.getArray())
             glUtil.bindTextureWithColor(gl, shaderProgram, "uSampler", material.color)
         }
 

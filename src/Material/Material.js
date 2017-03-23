@@ -21,9 +21,8 @@ export default class Material {
         this.uuid = uuid()
     }
 
-    makeShader(gl) {
-        console.warn("你在调用虚函数")
-    }
+    makeShader(gl) {}
 
+    // TODO
     clone() {}
 }

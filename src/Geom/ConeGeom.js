@@ -6,6 +6,8 @@ import Geom from "./Geom"
 export default class ConeGeom extends Geom {
     constructor(radius, seg, height) {
         super()
+        this.drawMode = "LINE_STRIP"
+
         seg = seg < 3 ? 3 : seg
 
         let apex = new Vec3(0,height,0)

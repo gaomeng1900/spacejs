@@ -1,7 +1,12 @@
 // phong
 void main() {
 
+    // NOTE: 为了让他不去尝试获取uSampler和vTexCoord
+    // 出此下策
     vec4 oColor = texture2D(uSampler, vTexCoord);
+    // false && bool(oColor = texture2D(uSampler, vTexCoord));
+    // oColor = texture2D(uSampler, vTexCoord)
+    // vec4 oColor = bool(uHasTex) ? texture2D(uSampler, vTexCoord) : vColor;
 
     // 自然光漫反射
     vec3 ambient = uAmbientLight.rgb * oColor.rgb;
@@ -24,7 +29,7 @@ void main() {
     // float spec = pow(max(dot(normal, halfwayDir), 0.0), uShininess);
     // case: 反面有高光
     float spec = pow(abs(dot(normal, halfwayDir)), uShininess);
-    
+
     // Phong 着色, 更真实?
     // // vec3 reflectanceRay = 2.0 * dot(normal, pointLightDir) * normal - pointLightDir;
     // vec3 reflectanceRay = reflect(-pointLightDir, normal);
@@ -35,4 +40,5 @@ void main() {
     // }
     vec3 specular = uPointLightColor.rgb * spec;
     gl_FragColor = vec4(diffuse + ambient + specular, 1.0);
+    // gl_FragColor = oColor;
 }

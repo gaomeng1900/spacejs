@@ -47,7 +47,7 @@ scene.add(custom)
 custom.pos.set(-5, 2, -2)
 
 let material1 = new Space.BasicMaterial({color: new Space.Color(1.0, .0, .0, 1.0)})
-let cone0 = new Space.Mesh(new Space.ConeGeom(1, 5, 3), material)
+let cone0 = new Space.Mesh(new Space.ConeGeom(1, 5, 3), material1)
 let cone1 = new Space.Mesh(new Space.ConeGeom(2, 50, 3), material1)
 cone0.pos.set(5, -2, 0)
 cone1.pos.set(-2, -4, -3)
@@ -97,7 +97,7 @@ const render = ()=>{
 
     cone1.rotateZ(1)
 
-    // sphere0.rotateX(1)
+    sphere0.rotateX(1)
     sphere0.rotateY(1)
 
     plane0.rotateY(2)

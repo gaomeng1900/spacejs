@@ -36,11 +36,11 @@ export default {
             // gl.depthFunc(gl.LESS)
             // 清除颜色和深度缓存
             gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT)
+            // NOTE: 启用这个插件,
+            // 来让 draw elements 支持 UNSIGNED_INT, 传Uint32入Array
+            gl.getExtension("OES_element_index_uint")
         }
 
-        // NOTE: 启用这个插件,
-        // 来让 draw elements 支持 UNSIGNED_INT, 传Uint32入Array
-        gl.getExtension("OES_element_index_uint")
 
         return gl
     },
@@ -111,6 +111,7 @@ export default {
         gl["vertexAttrib"+n+"f"](a, ...data)
     },
 
+    // 放到 1-7号纹理单元
     bindTexture(gl, shaderProgram, name, map) {
         let s = gl.getUniformLocation(shaderProgram, name)
         if (s < 0 ) {
@@ -125,9 +126,8 @@ export default {
         texture = map.glTexture
 
         if (! texUnit.includes(map.uuid)) { // NOTE:可能需要Polyfill
-            // TODO: uuid放到material里面显然更好
             // NOTE: 这里的缓存机制, 超过七个纹理时只对最后一个单元操作
-            // 这里需要一个更合理的缓存机制, 比方说计数来决定谁留在单元里
+            // TODO: 这里需要一个更合理的缓存机制, 比方说计数来决定谁留在单元里
             map.uuid = uuid()
             if (texUnit.length > 7) {
                 texUnit.pop() // 缓存7个
@@ -137,7 +137,7 @@ export default {
 
             // 开启y轴翻转
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1)
-            // 开启0号纹理单元
+            // 开启unitNum号纹理单元
             gl.activeTexture(gl["TEXTURE" + map.unitNum])
             // 绑定纹理对象
             gl.bindTexture(gl.TEXTURE_2D, texture)
@@ -147,7 +147,7 @@ export default {
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
             // 配置纹理图像
-            gl.texImage2D(gl.TEXTURE_2D, // TODO: 开销略大
+            gl.texImage2D(gl.TEXTURE_2D,
                           0,
                           gl.RGBA,
                           gl.RGBA,
@@ -158,6 +158,7 @@ export default {
         gl.uniform1i(s, map.unitNum)
     },
 
+    // 放到 0号纹理单元
     bindTextureWithColor(gl, shaderProgram, name, color) {
         let s = gl.getUniformLocation(shaderProgram, name)
         if (s < 0 ) {

@@ -10,13 +10,7 @@ export default class Texture {
         this.img = new Image()
         this.img.onload = () => {
             this.ready = true
-            this.update()
         }
         this.img.src = this.src
-    }
-
-    update() {
-        // img 已经加载好了
-        // 计算
     }
 }

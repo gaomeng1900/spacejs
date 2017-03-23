@@ -9,13 +9,7 @@ export default class Geom {
         this.drawType = "UNSIGNED_INT" // NOTE: 顶点数超过int8了, 而int16不能正常工作
         this.drawOffset = 0
 
-        // this.vertices = new Float32Array([])
-        // this.normals  = new Float32Array([])
-        // this.indices  = new Uint32Array([])
-        // this.uvMap    = new Float32Array([])
-
         this.faces = []
-        // this.faceUvs = []
     }
     initFromFaces() {
         let _vertices = this.faces.reduce((acc, face) => {

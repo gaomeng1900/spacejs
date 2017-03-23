@@ -10,10 +10,10 @@ export default class LineGeom extends Geom {
         this.drawMode = "LINE_STRIP"
 
         this.keyPoints = keyPoints
-        this.updateFromKeyPoints()
+        this.initFromKeyPoints()
     }
 
-    updateFromKeyPoints() {
+    initFromKeyPoints() {
         let _vertices = this.keyPoints.reduce((acc, key) => {
             return acc.concat(key.getArray())
         }, [])
