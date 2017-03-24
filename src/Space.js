@@ -1,6 +1,7 @@
 import glUtil from "./WebGL/util"
 import Mat4 from "./Math/Mat4"
 import Vec3 from "./Math/Vec3"
+import Vec4 from "./Math/Vec4"
 import Color from "./Math/Color"
 import CubeGeom from "./Geom/CubeGeom"
 import ConeGeom from "./Geom/ConeGeom"
@@ -26,6 +27,9 @@ const renderer_conf_default = {
     clearColor: new Color(1, 1, 1, 1)
 }
 
+const OFFSCREEN_WIDTH = 2048
+const OFFSCREEN_HEIGHT = 2048
+
 class Renderer {
     constructor(props) {
         this.conf = {
@@ -44,16 +48,45 @@ class Renderer {
         gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT)
         // 更新view mat(相机可能在移动呀)
         cam.updateVMat()
+
+        if (!scene.texture) {
+            scene.texture = gl.createTexture()
+        }
+        // 画出点光源的shadowmap
+        let bufferObj = glUtil.initFramebufferObject(gl, scene.texture, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT)
+
+        // NOTE: 下面这两个如果不同时出现会出现错误
+        gl.activeTexture(gl.TEXTURE7) // Set a texture object to the texture unit
+        gl.bindTexture(gl.TEXTURE_2D, bufferObj.texture)
+
+        gl.clearColor(0, 0, 1, 1)
+        gl.enable(gl.DEPTH_TEST)
+        gl.bindFramebuffer(gl.FRAMEBUFFER, bufferObj) // Change the drawing destination to FBO
+        gl.viewport(0, 0, OFFSCREEN_HEIGHT, OFFSCREEN_HEIGHT) // Set view port for FBO
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // Clear FBO
+        scene.lights.forEach(light => {
+            if (light.type === "pointLight") {
+                scene.objs.forEach(obj => {
+                    obj.drawShadow(gl, light)
+                })
+            }
+        })
+        // gl.bindTexture(gl.TEXTURE_2D, null);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null) // Change the drawing destination to color buffer
+        gl.clearColor(...this.conf.clearColor.getArray())
+        gl.viewport(0, 0, this.conf.canvas.width, this.conf.canvas.height)
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // Clear color and depth buffer
         // 遍历scene里的所有Mesh, 分别绑定着色器, 计算各种矩阵, 传入并绘制
         scene.objs.forEach(obj => {
             obj.draw(gl, scene, cam)
         })
+        // gl.bindTexture(gl.TEXTURE_2D, null)
     }
 }
 
-
 export default {
     Vec3: Vec3,
+    Vec4: Vec4,
     Mat4: Mat4,
     Color:Color,
     Renderer: Renderer,

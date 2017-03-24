@@ -18,3 +18,7 @@ uniform vec3  uViewPos;
 uniform float uHasTex;
 uniform sampler2D uSampler;
 varying vec2 vTexCoord;
+
+// 阴影
+varying vec4 vPosFromLight;
+uniform sampler2D uShadowMap;

@@ -4,6 +4,7 @@
  */
 
 import Vec3 from "./Vec3"
+import Vec4 from "./Vec4"
 
 /**
  * a1 a2 a3 a4
@@ -206,6 +207,16 @@ export default class Mat4 {
         }
 
         return this
+    }
+
+    multVec4(vec4) {
+        let e = this.elements
+        return new Vec4(
+            vec4.x * e[0] + vec4.y * e[4] + vec4.z * e[ 8] + vec4.w * e[12],
+            vec4.x * e[1] + vec4.y * e[5] + vec4.z * e[ 9] + vec4.w * e[13],
+            vec4.x * e[2] + vec4.y * e[6] + vec4.z * e[10] + vec4.w * e[14],
+            vec4.x * e[3] + vec4.y * e[7] + vec4.z * e[11] + vec4.w * e[15],
+        )
     }
 
     // 生成视图矩阵

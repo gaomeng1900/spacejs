@@ -1,7 +1,8 @@
 // 基本
 attribute vec4 aPosition;
-attribute vec4 aColor;
 attribute vec4 aNormal;
+attribute vec4 aColor;
+// attribute float a_Color;
 
 varying vec4 vColor;
 varying vec3 vPosition;
@@ -16,3 +17,7 @@ uniform mat4 uNormalMat;
 attribute vec2 aTexCoord;
 uniform   mat4 uViewMat;
 varying   vec2 vTexCoord;
+
+// 阴影
+uniform mat4 uProjMatFromLight;
+varying vec4 vPosFromLight;

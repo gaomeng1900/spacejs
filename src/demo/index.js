@@ -1,4 +1,34 @@
 import Space from "../Space"
+
+// 鼠标控制
+let mouse_begin = [0,0]
+let mouse_end = [0,0]
+let mouse_draging = false
+const canvas = document.getElementById("canvas")
+canvas.addEventListener("mousedown", event => {
+    mouse_draging = true
+    mouse_begin = [
+        event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft - canvas.offsetLeft,
+        event.clientY + document.body.scrollTop + document.documentElement.scrollTop - canvas.offsetTop,
+    ]
+    mouse_end = mouse_begin
+})
+
+canvas.addEventListener("mouseup", event => {
+    mouse_draging = false
+    mouse_begin = [0,0]
+    mouse_end = [0,0]
+})
+
+canvas.addEventListener("mousemove", event => {
+    if (mouse_draging) {
+        mouse_end = [
+            event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft - canvas.offsetLeft,
+            event.clientY + document.body.scrollTop + document.documentElement.scrollTop - canvas.offsetTop,
+        ]
+    }
+})
+
 // GL 渲染器
 let renderer = new Space.Renderer({
     canvas: document.getElementById("canvas"),
@@ -36,14 +66,14 @@ let cubeGeom = new Space.CubeGeom(5)
 let cube0 = new Space.Mesh(cubeGeom, material)
 let cube1 = new Space.Mesh(cubeGeom, material)
 let cube2 = new Space.Mesh(cubeGeom, material)
-cube0.scale(1, 2, 3)
-cube0.pos.set(4, 4, -2)
-cube1.pos.set(2, 2, -2)
-cube2.pos.set(-5, 5, -10)
-scene.add(cube0, cube1, cube2)
+cube0.scale(1, 2, 1.5)
+cube0.pos.set(4, -1, 0)
+cube1.pos.set(2, 0.5, 1)
+// cube2.pos.set(-5, 5, -10)
+scene.add(cube0, cube1)
 
 let custom = new Space.Mesh(new Space.CustomGeom(), material)
-scene.add(custom)
+// scene.add(custom)
 custom.pos.set(-5, 2, -2)
 
 let material1 = new Space.BasicMaterial({color: new Space.Color(1.0, .0, .0, 1.0)})
@@ -51,16 +81,16 @@ let cone0 = new Space.Mesh(new Space.ConeGeom(1, 5, 3), material1)
 let cone1 = new Space.Mesh(new Space.ConeGeom(2, 50, 3), material1)
 cone0.pos.set(5, -2, 0)
 cone1.pos.set(-2, -4, -3)
-scene.add( cone0, cone1 )
+// scene.add( cone0, cone1 )
 
 import earth_img from "./earth-0.jpg"
 let material2 = new Space.BasicMaterial({map: new Space.Texture(earth_img)})
 let sphere0 = new Space.Mesh(new Space.SphereGeom(1.5, 18, 18), material2)
-sphere0.pos.set(-1, -1, 0)
+sphere0.pos.set(0, 0, -1)
 scene.add(sphere0)
 
-let plane0 = new Space.Mesh(new Space.PlaneGeom(2, 1), material2)
-plane0.pos.set(3, -3, 0)
+let plane0 = new Space.Mesh(new Space.PlaneGeom(24, 14), material2)
+plane0.pos.set(0, 0, -4)
 scene.add(plane0)
 
 let keyPoints = [
@@ -70,7 +100,7 @@ let keyPoints = [
 ]
 let lineMaterial = new Space.LineMaterial({color: new Space.Color(1, 1, 0, 1)})
 let line0 = new Space.Line(new Space.LineGeom(keyPoints), lineMaterial)
-scene.add(line0)
+// scene.add(line0)
 
 
 // 渲染
@@ -100,16 +130,25 @@ const render = ()=>{
     sphere0.rotateX(1)
     sphere0.rotateY(1)
 
-    plane0.rotateY(2)
-    plane0.rotateX(2)
+    // plane0.rotateY(2)
+    // plane0.rotateX(2)
 
     line0.rotateX(1)
     line0.rotateY(1)
     line0.rotateZ(1)
 
+    let r_x = new Space.Mat4().setRotate(0.2 * (mouse_begin[1] - mouse_end[1]), 1, 0, 0)
+    let r_y = new Space.Mat4().setRotate(0.2 * (mouse_begin[0] - mouse_end[0]), 0, 1, 0)
+    let new_pos = r_x.mult(r_y).multVec4(new Space.Vec4(cam.pos.x, cam.pos.y, cam.pos.z, 1.0))
+    // console.log(new_pos);
+    cam.pos.set(new_pos.x, new_pos.y, new_pos.z)
+    mouse_begin = mouse_end
+
+
     renderer.render(scene, cam)
 }
 render()
+window.render = render
 
 window._print = (array, count) => {
     let lines = Math.ceil(array.length / count)

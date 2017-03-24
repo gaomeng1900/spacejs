@@ -4,6 +4,7 @@ void main() {
     vPosition = vec3(uModelMat * aPosition);
     vNormal = normalize(vec3(uNormalMat * aNormal));
     vColor = aColor;
+    vPosFromLight = uProjMatFromLight * aPosition;
 
     vTexCoord = aTexCoord;
 }
