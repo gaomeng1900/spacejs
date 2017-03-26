@@ -39,7 +39,7 @@ let renderer = new Space.Renderer({
 
 // 相机
 let cam = new Space.Camera("perspective", 90, 1, 0.1, 100)//fov, aspect, near, far
-cam.pos.set(0, 0, 7)
+cam.pos.set(0, 0, 5)
 cam.up.set(0, 1, 0)
 cam.center.set(0, 0, 0)
 window.cam = cam
@@ -85,7 +85,7 @@ cone1.pos.set(-2, -4, -3)
 
 import earth_img from "./earth-0.jpg"
 let material2 = new Space.BasicMaterial({map: new Space.Texture(earth_img)})
-let sphere0 = new Space.Mesh(new Space.SphereGeom(1.5, 18, 18), material2)
+let sphere0 = new Space.Mesh(new Space.SphereGeom(1.5, 32, 32), material2)
 sphere0.pos.set(0, 0, -1)
 scene.add(sphere0)
 

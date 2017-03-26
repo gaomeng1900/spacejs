@@ -6,15 +6,111 @@ float unpackDepth(const in vec4 rgbaDepth) {
   return depth;
 }
 
+vec2 getVisibility(const in sampler2D shadowMap, in vec3 shadowCoord, in vec2 shift) {
+    float depth = unpackDepth(texture2D(uShadowMap, shadowCoord.xy + shift));
+    bool visibility = depth + 0.001 > shadowCoord.z;
+    float visibilityPointLight = visibility ? 2.0 : 0.2;
+    float visibilityHightLight = visibility ? 2.0 : 0.1;
+    return vec2(visibilityPointLight, visibilityHightLight);
+}
+
 // phong
 void main() {
 
     vec3 shadowCoord = (vPosFromLight.xyz/vPosFromLight.w)/2.0 + 0.5;
     vec4 rgbaDepth = texture2D(uShadowMap, shadowCoord.xy);
     float depth = unpackDepth(rgbaDepth); // Retrieve the z-value from R
-    bool visibility = shadowCoord.z > depth + 0.0015;
-    float visibilityPointLight = visibility ? 0.7 : 1.0;
-    float visibilityHightLight = visibility ? 0.1 : 1.0;
+    bool visibility = depth + 0.001 > shadowCoord.z;
+    float visibilityPointLight;
+    float visibilityHightLight;
+    if(!visibility){
+    // if(true){
+        // 阴影部分进行模糊采样
+        // vec4 rgbaDepth0 = texture2D(uShadowMap, shadowCoord.xy + vec2(-0.001, -0.001));
+        // vec4 rgbaDepth1 = texture2D(uShadowMap, shadowCoord.xy + vec2(0.001, -0.001));
+        // vec4 rgbaDepth2 = texture2D(uShadowMap, shadowCoord.xy + vec2(-0.001, 0.001));
+        // vec4 rgbaDepth3 = texture2D(uShadowMap, shadowCoord.xy + vec2(0.001, 0.001));
+        // float depth0 = unpackDepth(texture2D(uShadowMap, shadowCoord.xy + vec2(-0.002, -0.002)));
+        // bool visibility0 = depth0 + 0.001 > shadowCoord.z;
+        // float visibilityPointLight0 = visibility0 ? 1.0 : 0.7;
+        // float visibilityHightLight0 = visibility0 ? 1.0 : 0.1;
+
+
+        vec2 visi = vec2(0.0, 0.0);
+        for(float i = -2.0; i <= 2.0; i++)
+        {
+            for(float j = -2.0; j <= 2.0; j++)
+            {
+                visi += getVisibility(uShadowMap, shadowCoord, vec2(0.001 * i, 0.001 * j)) / 25.0;
+            }
+        }
+
+        // NOTE: 考虑到只对阴影进行模糊, 会使模糊之后的边缘依然比较明显
+        // 因此这里要把边缘弄成亮的
+
+
+
+        // visibilityPointLight = smoothstep(0.1, 1.0, visi.x);
+        // visibilityHightLight = smoothstep(0.1, 1.0, visi.y);
+        visibilityPointLight = min(visi.x, 1.0);
+        visibilityHightLight = min(visi.y, 1.0);
+
+        // vec2 visi0 = getVisibility(uShadowMap, shadowCoord, vec2(-0.001, -0.001)) * 0.9;
+        // vec2 visi1 = getVisibility(uShadowMap, shadowCoord, vec2(-0.001, 0.0));
+        // vec2 visi2 = getVisibility(uShadowMap, shadowCoord, vec2(-0.001, 0.001)) * 0.9;
+        // vec2 visi3 = getVisibility(uShadowMap, shadowCoord, vec2(0.0, -0.001));
+        // vec2 visi4 = getVisibility(uShadowMap, shadowCoord, vec2(0.0, 0.001));
+        // vec2 visi5 = getVisibility(uShadowMap, shadowCoord, vec2(0.001, -0.001)) * 0.9;
+        // vec2 visi6 = getVisibility(uShadowMap, shadowCoord, vec2(0.001, 0.0));
+        // vec2 visi7 = getVisibility(uShadowMap, shadowCoord, vec2(0.001, +0.001)) * 0.9;
+        // vec2 visi8 = vec2(visibility ? 1.0 : 0.7, visibility ? 1.0 : 0.1) * 1.4;
+        //
+        // float depth1 = unpackDepth(texture2D(uShadowMap, shadowCoord.xy + vec2(0.002, -0.002)));
+        // bool visibility1 = depth1 + 0.001 > shadowCoord.z;
+        // float visibilityPointLight1 = visibility1 ? 1.0 : 0.7;
+        // float visibilityHightLight1 = visibility1 ? 1.0 : 0.1;
+
+        // float depth2 = unpackDepth(texture2D(uShadowMap, shadowCoord.xy + vec2(-0.002, 0.002)));
+        // bool visibility2 = depth2 + 0.001 > shadowCoord.z;
+        // float visibilityPointLight2 = visibility2 ? 1.0 : 0.7;
+        // float visibilityHightLight2 = visibility2 ? 1.0 : 0.1;
+
+        // float depth3 = unpackDepth(texture2D(uShadowMap, shadowCoord.xy + vec2(0.002, 0.002)));
+        // bool visibility3 = depth3 + 0.001 > shadowCoord.z;
+        // float visibilityPointLight3 = visibility3 ? 1.0 : 0.7;
+        // float visibilityHightLight3 = visibility3 ? 1.0 : 0.1;
+
+        // visibilityPointLight = (visibilityPointLight0 +
+        //                         visibilityPointLight1 +
+        //                         visibilityPointLight2 +
+        //                         visibilityPointLight3) /4.0;
+        // visibilityHightLight = (visibilityHightLight0 +
+        //                         visibilityHightLight1 +
+        //                         visibilityHightLight2 +
+        //                         visibilityHightLight3) /4.0;
+        //
+        // visibilityPointLight = (visi0.x +
+        //                         visi1.x +
+        //                         visi2.x +
+        //                         visi3.x +
+        //                         visi4.x +
+        //                         visi5.x +
+        //                         visi6.x +
+        //                         visi7.x +
+        //                         visi8.x) /9.0;
+        // visibilityHightLight = (visi0.y +
+        //                         visi1.y +
+        //                         visi2.y +
+        //                         visi3.y +
+        //                         visi4.y +
+        //                         visi5.y +
+        //                         visi6.y +
+        //                         visi7.y +
+        //                         visi8.y) /9.0;
+    } else {
+        visibilityPointLight = visibility ? 1.0 : 0.7;
+        visibilityHightLight = visibility ? 1.0 : 0.1;
+    }
 
     vec4 ambientLightColor = uAmbientLight;
     vec4 pointLightColor = uPointLightColor * visibilityPointLight;
@@ -35,9 +131,9 @@ void main() {
     vec3 normal        = normalize(vNormal);
     vec3 pointLightDir = normalize(uPointLightPos - vPosition);
     // case: 反面无点光源漫反射
-    // float nDotL        = max(dot(pointLightDir, normal), 0.0);
+    float nDotL        = max(dot(pointLightDir, normal), 0.0);
     // case: 反面也有漫反射
-    float nDotL        = abs(dot(pointLightDir, normal));
+    // float nDotL        = abs(dot(pointLightDir, normal));
     // 点光源漫反射
     // vec3 diffuse = uPointLightColor.rgb * oColor.rgb * nDotL;
     vec3 diffuse = pointLightColor.rgb * oColor.rgb * nDotL;
