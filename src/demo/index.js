@@ -85,7 +85,7 @@ cone1.pos.set(-2, -4, -3)
 
 import earth_img from "./earth-0.jpg"
 let material2 = new Space.BasicMaterial({map: new Space.Texture(earth_img)})
-let sphere0 = new Space.Mesh(new Space.SphereGeom(1.5, 32, 32), material2)
+let sphere0 = new Space.Mesh(new Space.SphereGeom(1.5, 20, 20), material2)
 sphere0.pos.set(0, 0, -2)
 scene.add(sphere0)
 

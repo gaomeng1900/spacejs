@@ -11,15 +11,20 @@ vec2 getVisibilityFromMap(const in sampler2D shadowMap, in vec3 shadowCoord, in 
     shadowCoord.y = shadowCoord.y >= 1.0 ? 0.999 : shadowCoord.y;
     shadowCoord.y = shadowCoord.y <= 0.0 ? 0.001 : shadowCoord.y;
     float depth = unpackDepth(texture2D(shadowMap, shadowCoord.xy + shift));
-    if(abs(depth - campare_depth) > 0.01) // 深度相差过大, 说明分层
-    {
+    if(abs(depth - campare_depth) > 0.01) { // 深度相差过大, 说明分层
         return vec2(1.0, 1.0);
     }
     bool visibility = depth + 0.0018 > shadowCoord.z;
     float visibilityPointLight = visibility ? 1.0 : 0.0;
     float visibilityHightLight = visibility ? 1.0 : 0.0;
+    // NOTE: 该优化无明显效果
+    // vec2 result = (abs(depth - campare_depth) > 0.01) ? vec2(1.0, 1.0) : vec2(visibilityPointLight, visibilityHightLight);
+    // return result;
     return vec2(visibilityPointLight, visibilityHightLight);
 }
+
+const float BLUR_R = 2.0;
+const float BLUR_W = pow(BLUR_R + 1.0, 2.0);
 
 vec2 getVisibility(const in sampler2D shadowMap, in vec4 posFromLight) {
     vec3 shadowCoord = (posFromLight.xyz/posFromLight.w)/2.0 + 0.5;
@@ -32,21 +37,28 @@ vec2 getVisibility(const in sampler2D shadowMap, in vec4 posFromLight) {
         vec4 rgbaDepth = texture2D(shadowMap, shadowCoord.xy);
         float depth = unpackDepth(rgbaDepth); // Retrieve the z-value from R
         bool visibility = depth + 0.0018 > shadowCoord.z;
+        // float visibilityPointLight = visibility ? 1.0 : 0.0;
+        // float visibilityHightLight = visibility ? 1.0 : 0.0;
         float visibilityPointLight;
         float visibilityHightLight;
         if(!visibility){
         // if(true){
             vec2 visi = vec2(0.0, 0.0);
-            mat3 visisA;
-            mat3 visisB;
-            for(float i = -1.0; i <= 1.0; i++)
+            // mat3 visisA;
+            // mat3 visisB;
+            // 高斯模糊
+            for(float i = -BLUR_R; i <= BLUR_R; i++)
             {
-                for(float j = -1.0; j <= 1.0; j++)
+                for(float j = -BLUR_R; j <= BLUR_R; j++)
                 {
-                    // TODO: 这个+=会导致每次loop对上一次LOOP产生依赖而无法并行
-                    visi += getVisibilityFromMap(shadowMap, shadowCoord, vec2(0.001 * i, 0.001 * j), depth) / 9.0;
+                    // NOTE: 这个+=会导致每次loop对上一次LOOP产生依赖而无法并行
+                    // NOTE: 矩阵写入会造成更大的性能消耗
+                    // 平均权重
+                    // visi += getVisibilityFromMap(shadowMap, shadowCoord, vec2(0.001 * i, 0.001 * j), depth) / BLUR_W;
+                    // 半径权重
+                    visi += getVisibilityFromMap(shadowMap, shadowCoord, vec2(0.001 * i, 0.001 * j), depth) / BLUR_W / (abs(i * j) + 1.0);
 
-                    // visi = getVisibilityFromMap(shadowMap, shadowCoord, vec2(0.001 * i, 0.001 * j), depth) / 9.0;
+                    // visi = getVisibilityFromMap(shadowMap, shadowCoord, vec2(0.001 * i, 0.001 * j), depth);
                     // visisA[int(i)+1][int(j)+1] = visi.x;
                     // visisB[int(i)+1][int(j)+1] = visi.x;
                 }
@@ -62,24 +74,8 @@ vec2 getVisibility(const in sampler2D shadowMap, in vec4 posFromLight) {
     }
 }
 
-// vec2 getVisibilityAll() {
-//     vec2 visibilities = getVisibility(uShadowMap0, vPosFromLight0);
-//     visibilities += getVisibility(uShadowMap1, vPosFromLight1);
-//     visibilities += getVisibility(uShadowMap2, vPosFromLight2);
-//     visibilities += getVisibility(uShadowMap3, vPosFromLight3);
-//     visibilities += getVisibility(uShadowMap4, vPosFromLight4);
-//     visibilities += getVisibility(uShadowMap5, vPosFromLight5);
-//     return vec2(min(visibilities.x, 1.0), min(visibilities.y, 1.0)); // 两个光线视锥的相交处会过亮
-// }
-
-
-
 // phong
 void main() {
-    // vec2 visibilities = getVisibilityAll();
-    // float visibilityPointLight = visibilities.x; // 两个光线视锥的相交处会过亮
-    // float visibilityHightLight = visibilities.y;
-
     vec2 visibilities = getVisibility(uShadowMap0, vPosFromLight0);
 
     // ->

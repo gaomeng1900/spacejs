@@ -28,8 +28,9 @@ const renderer_conf_default = {
 }
 
 const bufferObj = []
+let FOB
 
-const SQ2 = Math.sqrt(2)
+// const SQ2 = Math.sqrt(2)
 
 const OFFSCREEN_WIDTH = 1000
 const OFFSCREEN_HEIGHT = 1000
@@ -94,22 +95,30 @@ class Renderer {
                 scene.shadowTextures.push(gl.createTexture())
             }
         }
+        // test: texture cube
+        if (!scene.shadow_texture_cube) {
+            scene.shadow_texture_cube = gl.createTexture()
+        }
         // 画六张shadowmap
-        // let bufferObj = []
         for (let i = 0; i < 6; i++) {
             // 画出点光源的shadowmap
-            let _shadowArticulation = 2048
-            let _width, _height
-            if (i < 4) {
-                _width = _shadowArticulation
-                _height = SQ2 * _shadowArticulation / 2
-            } else {
-                _width = _shadowArticulation
-                _height = _shadowArticulation
-            }
-
+            // 完全没有必要弄一个奇怪的立方体
+            // let _shadowArticulation = 2048
+            // let _width, _height
+            // if (i < 4) {
+            //     _width = _shadowArticulation
+            //     _height = SQ2 * _shadowArticulation / 2
+            // } else {
+            //     _width = _shadowArticulation
+            //     _height = _shadowArticulation
+            // }
+            //
+            // if (!bufferObj[i]) {
+            //     bufferObj[i] = glUtil.initFramebufferObject(gl, scene.shadowTextures[i], _width, _height)
+            // }
+            // 正立方体多方便
             if (!bufferObj[i]) {
-                bufferObj[i] = glUtil.initFramebufferObject(gl, scene.shadowTextures[i], _width, _height)
+                bufferObj[i] = glUtil.initFramebufferObject(gl, scene.shadowTextures[i], OFFSCREEN_WIDTH, OFFSCREEN_WIDTH)
             }
 
             // NOTE: 下面这两个如果不同时出现会出现错误
@@ -120,7 +129,7 @@ class Renderer {
             gl.enable(gl.DEPTH_TEST)
             gl.bindFramebuffer(gl.FRAMEBUFFER, bufferObj[i]) // Change the drawing destination to FBO
 
-            gl.viewport(0, 0, _width, _height) // Set view port for FBO
+            gl.viewport(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_WIDTH) // Set view port for FBO
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // Clear FBO
             scene.lights.forEach(light => {
                 // light.bufferObj = light.bufferObj ? light.bufferObj : []
@@ -146,6 +155,12 @@ class Renderer {
                 }
             })
         }
+
+
+        // 画一个cubemap
+
+
+
         // gl.bindTexture(gl.TEXTURE_2D, null);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null) // Change the drawing destination to color buffer
         gl.clearColor(...this.conf.clearColor.getArray())

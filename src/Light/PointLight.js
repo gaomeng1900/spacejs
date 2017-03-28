@@ -19,8 +19,11 @@ export default class PointLight extends Light {
         this.intensity = intensity
 
         this.updateVMat()
-        this.pMatA = new Mat4().setPerspective(90, SQ2, 0.1, 100 * SQ2 / 2) // 注意far对齐
-        this.pMatB = new Mat4().setPerspective(alpha, 1, 0.1, 100) // 注意far对齐
+
+        // this.pMatA = new Mat4().setPerspective(90, SQ2, 0.1, 100 * SQ2 / 2) // 注意far对齐
+        // this.pMatB = new Mat4().setPerspective(alpha, 1, 0.1, 100) // 注意far对齐
+        // NOTE: 完全没有必要弄成上面那个样子嘛fuck!!!!
+        this.pMat = new Mat4().setPerspective(90, 1, 0.1, 100)
     }
 
     getMatFromLight(mMat, n) {
@@ -75,32 +78,32 @@ export default class PointLight extends Light {
         // }
         switch (n) {
             case 0:
-                pMat = this.pMatA.clone()
+                pMat = this.pMat.clone()
                 vMat = this.vMat0
                 pMatFromLight = pMat.mult(vMat).mult(mMat)
                 break;
             case 1:
-                pMat = this.pMatA.clone()
+                pMat = this.pMat.clone()
                 vMat = this.vMat1
                 pMatFromLight = pMat.mult(vMat).mult(mMat)
                 break;
             case 2:
-                pMat = this.pMatA.clone()
+                pMat = this.pMat.clone()
                 vMat = this.vMat2
                 pMatFromLight = pMat.mult(vMat).mult(mMat)
                 break;
             case 3:
-                pMat = this.pMatA.clone()
+                pMat = this.pMat.clone()
                 vMat = this.vMat3
                 pMatFromLight = pMat.mult(vMat).mult(mMat)
                 break;
             case 4:
-                pMat = this.pMatB.clone()
+                pMat = this.pMat.clone()
                 vMat = this.vMat4
                 pMatFromLight = pMat.mult(vMat).mult(mMat)
                 break;
             case 5:
-                pMat = this.pMatB.clone()
+                pMat = this.pMat.clone()
                 vMat = this.vMat5
                 pMatFromLight = pMat.mult(vMat).mult(mMat)
                 break;

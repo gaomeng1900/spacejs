@@ -24,7 +24,7 @@ vec2 getVisibilityFromMap(const in sampler2D shadowMap, in vec3 shadowCoord, in 
 vec2 getVisibility(const in sampler2D shadowMap, in vec4 posFromLight) {
     vec3 shadowCoord = (posFromLight.xyz/posFromLight.w)/2.0 + 0.5;
     // 不在当前阴影贴图范围的就不要计算
-    if(shadowCoord.x > 1.0 || shadowCoord.y > 1.0 || shadowCoord.x < 0.0 || shadowCoord.y < 0.0)
+    if(shadowCoord.x > 1.0 || shadowCoord.y > 1.0 || shadowCoord.x < 0.0 || shadowCoord.y < 0.0 || shadowCoord.z < 0.0 || shadowCoord.z > 1.0)
     {
         return vec2(0.0, 0.0);
     } else {
