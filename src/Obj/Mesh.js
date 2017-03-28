@@ -2,18 +2,20 @@ import Obj from "./Obj"
 import glUtil from "../WebGL/util"
 import Mat4 from "../Math/Mat4"
 
+const SQ2 = Math.sqrt(2)
+
 export default class Mesh extends Obj{
     constructor(geom, material) {
         super(geom, material)
         // THREE: drawMode, clone, rayCast
-
+        this._hasBind = 0
     }
 
     draw(gl, scene, cam) {
         const geom = this.geom
         const material = this.material
         // 更新 模型矩阵, 模型逆转置矩阵
-        this.updateMat()
+        // this.updateMat()
 
         // 重复link性能太差
         let shaderProgram = material.shaderProgram
@@ -37,6 +39,9 @@ export default class Mesh extends Obj{
 
         // 顶点顺序
         glUtil.bindElemArrayBuffer(gl, geom.indices)
+        if (!this._hasBind) {
+            this._hasBind = true
+        }
 
         // 光
         scene.lights.forEach(light => {
@@ -55,11 +60,15 @@ export default class Mesh extends Obj{
 
         // 高光
         glUtil.unf(gl, shaderProgram, "uViewPos", cam.pos.x, cam.pos.y, cam.pos.z)
-        glUtil.unf(gl, shaderProgram, "uShininess", 20.0)
+        glUtil.unf(gl, shaderProgram, "uShininess", 10.0)
 
         // 阴影
-        glUtil.bindTextureWithUnit(gl, shaderProgram, "uShadowMap", 7, scene.texture)
-        glUtil.uMat(gl, shaderProgram, "uProjMatFromLight", this.pMatFromLight.getArray())
+        // glUtil.bindTextureWithUnit(gl, shaderProgram, "uShadowMap", 7, scene.texture)
+        // glUtil.uMat(gl, shaderProgram, "uProjMatFromLight", this.pMatFromLight.getArray())
+        for (let i = 0; i < 6; i++) {
+            glUtil.bindTextureWithUnit(gl, shaderProgram, "uShadowMap" + i, 7 + i, scene.shadowTextures[i])
+            glUtil.uMat(gl, shaderProgram, "uProjMatFromLight" + i, this["pMatFromLight" + i].getArray())
+        }
 
         // 矩阵
         glUtil.uMat(gl, shaderProgram, "uModelMat", this.mMat.getArray())
@@ -101,4 +110,29 @@ export default class Mesh extends Obj{
 
         gl.drawElements(gl[geom.drawMode], geom.drawCount, gl[geom.drawType], geom.drawOffset)
     }
+
+    drawShadowN(gl, light, n) {
+        const geom = this.geom
+        const material = this.material
+        // // 更新 模型矩阵, 模型逆转置矩阵
+        // this.updateMat()
+
+        let shaderProgram = material.programShadow
+        gl.useProgram(shaderProgram)
+
+        // 顶点
+        glUtil.bindArrayBuffer(gl, shaderProgram, "aPosition", geom.vertices)
+
+        // 顶点顺序
+        glUtil.bindElemArrayBuffer(gl, geom.indices)
+
+        // 矩阵
+        // NOTE: 能不能缓存!!!
+        let pMatFromLight = light.getMatFromLight(this.mMat, n)
+        this["pMatFromLight" + n] = pMatFromLight
+        glUtil.uMat(gl, shaderProgram, "uProjMatFromLight", pMatFromLight.getArray())
+
+        gl.drawElements(gl[geom.drawMode], geom.drawCount, gl[geom.drawType], geom.drawOffset)
+    }
+
 }

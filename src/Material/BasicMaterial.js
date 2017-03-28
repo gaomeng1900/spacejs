@@ -1,12 +1,14 @@
 import Material from "./Material"
 // shader segment
 import vs_head from "./shaderSegment/head.vs"
-import vs_main_color from "./shaderSegment/main_color.vs"
-import vs_main_tex from "./shaderSegment/main_tex.vs"
-
 import fs_head from "./shaderSegment/head.fs"
+import vs_main_color from "./shaderSegment/main_color.vs"
 import fs_main_color from "./shaderSegment/main_color.fs"
-import fs_main_tex from "./shaderSegment/main_tex.fs"
+
+// import vs_main_tex from "./shaderSegment/main_tex.vs"
+// import fs_main_tex from "./shaderSegment/main_tex.fs"
+import vs_main_tex from "./shaderSegment/main_tex_turbo.vs"
+import fs_main_tex from "./shaderSegment/main_tex_turbo.fs"
 
 // 阴影
 import vs_shadow from "./shaderSegment/shadow.vs"

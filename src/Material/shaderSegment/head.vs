@@ -21,3 +21,21 @@ varying   vec2 vTexCoord;
 // 阴影
 uniform mat4 uProjMatFromLight;
 varying vec4 vPosFromLight;
+
+uniform mat4 uProjMatFromLight0;
+varying vec4 vPosFromLight0;
+
+uniform mat4 uProjMatFromLight1;
+varying vec4 vPosFromLight1;
+
+uniform mat4 uProjMatFromLight2;
+varying vec4 vPosFromLight2;
+
+uniform mat4 uProjMatFromLight3;
+varying vec4 vPosFromLight3;
+
+uniform mat4 uProjMatFromLight4;
+varying vec4 vPosFromLight4;
+
+uniform mat4 uProjMatFromLight5;
+varying vec4 vPosFromLight5;

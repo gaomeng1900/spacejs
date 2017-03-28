@@ -49,7 +49,7 @@ let scene = new Space.Scene(renderer) // TODO: THREE是怎么处理的, link sha
 window.scene = scene
 
 // 光源
-let pLight = new Space.PointLight(new Space.Vec3(4.0, 4.0, 4.0),
+let pLight = new Space.PointLight(new Space.Vec3(4.0, 4.0, -1.0),
                                   new Space.Color(0.9, 0.9, 0.9, 1.0))
 let aLight = new Space.AmbientLight(new Space.Color(0.5, 0.5, 0.5, 1.0))
 scene.add(pLight)
@@ -68,7 +68,7 @@ let cube1 = new Space.Mesh(cubeGeom, material)
 let cube2 = new Space.Mesh(cubeGeom, material)
 cube0.scale(1, 2, 1.5)
 cube0.pos.set(4, -1, 0)
-cube1.pos.set(2, 0.5, 1)
+cube1.pos.set(-2, 1.0, -2.5)
 // cube2.pos.set(-5, 5, -10)
 scene.add(cube0, cube1)
 
@@ -86,7 +86,7 @@ cone1.pos.set(-2, -4, -3)
 import earth_img from "./earth-0.jpg"
 let material2 = new Space.BasicMaterial({map: new Space.Texture(earth_img)})
 let sphere0 = new Space.Mesh(new Space.SphereGeom(1.5, 32, 32), material2)
-sphere0.pos.set(0, 0, -1)
+sphere0.pos.set(0, 0, -2)
 scene.add(sphere0)
 
 let plane0 = new Space.Mesh(new Space.PlaneGeom(24, 14), material2)

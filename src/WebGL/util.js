@@ -8,6 +8,8 @@ let MAX_TEX_UNIT = 0 // 当前环境最大纹理单元数量
 // let texture // used in bindTextureWithUnit()
 // window.texture
 
+let _test
+
 window.buffers = buffers
 window.texUnit = texUnit
 
@@ -51,6 +53,10 @@ export default {
             // 获取纹理单元数量, 用来优化缓存
             MAX_TEX_UNIT = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS)
             console.log("纹理单元数量: ", MAX_TEX_UNIT);
+
+            // 不绘制反面
+            gl.enable(gl.CULL_FACE)
+            gl.cullFace(gl.BACK)
         }
 
 
@@ -88,7 +94,7 @@ export default {
         }
         let buffer = buffers[name]
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
-        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW)
+        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW) // NOTE: 改成DYNAMIC_DRAW性能反而会变差, STREAM略好一点
         gl.vertexAttribPointer(a, n, gl.FLOAT, false, 0, 0)
         gl.enableVertexAttribArray(a)
     },
@@ -102,7 +108,7 @@ export default {
             buffers["ELEMENT_ARRAY_BUFFER"] = buffer
         }
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer)
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, gl.STATIC_DRAW)
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, gl.STREAM_DRAW) // NOTE: 改成DYNAMIC_DRAW性能反而会变差, STREAM略好一点
     },
 
     unf(gl, shaderProgram, name, ...data) {
@@ -233,11 +239,14 @@ export default {
         gl.uniformMatrix4fv(u, false, data)
     },
 
+    // NOTE: 这里的性能消耗非常大!!!!
     initFramebufferObject(gl, texture, width, height) {
-        framebuffer || (framebuffer = gl.createFramebuffer())
+        // framebuffer || (framebuffer = gl.createFramebuffer())
         // texture = this.gl.createTexture()
-        depthBuffer || (depthBuffer = gl.createRenderbuffer())
+        // depthBuffer || (depthBuffer = gl.createRenderbuffer())
         // var framebuffer, texture, depthBuffer;
+        let framebuffer = gl.createFramebuffer()
+        let depthBuffer = gl.createRenderbuffer()
 
         // Define the error handling function
         var error = function() {

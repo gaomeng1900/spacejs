@@ -27,8 +27,12 @@ const renderer_conf_default = {
     clearColor: new Color(1, 1, 1, 1)
 }
 
-const OFFSCREEN_WIDTH = 2048
-const OFFSCREEN_HEIGHT = 2048
+const bufferObj = []
+
+const SQ2 = Math.sqrt(2)
+
+const OFFSCREEN_WIDTH = 1000
+const OFFSCREEN_HEIGHT = 1000
 
 class Renderer {
     constructor(props) {
@@ -43,34 +47,105 @@ class Renderer {
     }
 
     render(scene, cam) {
+        // const gl = this.gl
+        // // 重置
+        // gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT)
+        // // 更新view mat(相机可能在移动呀)
+        // cam.updateVMat()
+        //
+        // if (!scene.texture) {
+        //     scene.texture = gl.createTexture()
+        // }
+        // // 画出点光源的shadowmap
+        // let bufferObj = glUtil.initFramebufferObject(gl, scene.texture, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT)
+        //
+        // // NOTE: 下面这两个如果不同时出现会出现错误
+        // gl.activeTexture(gl.TEXTURE7) // Set a texture object to the texture unit
+        // gl.bindTexture(gl.TEXTURE_2D, bufferObj.texture)
+        //
+        // gl.clearColor(0, 0, 1, 1)
+        // gl.enable(gl.DEPTH_TEST)
+        // gl.bindFramebuffer(gl.FRAMEBUFFER, bufferObj) // Change the drawing destination to FBO
+        // gl.viewport(0, 0, OFFSCREEN_HEIGHT, OFFSCREEN_HEIGHT) // Set view port for FBO
+        // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // Clear FBO
+        // scene.lights.forEach(light => {
+        //     if (light.type === "pointLight") {
+        //         scene.objs.forEach(obj => {
+        //             obj.drawShadow(gl, light)
+        //             // obj.drawShadowN(gl, light, 0)
+        //         })
+        //     }
+        // })
+
         const gl = this.gl
         // 重置
         gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT)
         // 更新view mat(相机可能在移动呀)
         cam.updateVMat()
 
-        if (!scene.texture) {
-            scene.texture = gl.createTexture()
-        }
-        // 画出点光源的shadowmap
-        let bufferObj = glUtil.initFramebufferObject(gl, scene.texture, OFFSCREEN_WIDTH, OFFSCREEN_HEIGHT)
-
-        // NOTE: 下面这两个如果不同时出现会出现错误
-        gl.activeTexture(gl.TEXTURE7) // Set a texture object to the texture unit
-        gl.bindTexture(gl.TEXTURE_2D, bufferObj.texture)
-
-        gl.clearColor(0, 0, 1, 1)
-        gl.enable(gl.DEPTH_TEST)
-        gl.bindFramebuffer(gl.FRAMEBUFFER, bufferObj) // Change the drawing destination to FBO
-        gl.viewport(0, 0, OFFSCREEN_HEIGHT, OFFSCREEN_HEIGHT) // Set view port for FBO
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // Clear FBO
-        scene.lights.forEach(light => {
-            if (light.type === "pointLight") {
-                scene.objs.forEach(obj => {
-                    obj.drawShadow(gl, light)
-                })
-            }
+        // 更新 模型矩阵, 模型逆转置矩阵
+        scene.objs.forEach(obj => {
+            obj.updateMat()
         })
+
+        if (!scene.shadowTextures) {
+            scene.shadowTextures = []
+            for (let i = 0; i < 6; i++) {
+                scene.shadowTextures.push(gl.createTexture())
+            }
+        }
+        // 画六张shadowmap
+        // let bufferObj = []
+        for (let i = 0; i < 6; i++) {
+            // 画出点光源的shadowmap
+            let _shadowArticulation = 2048
+            let _width, _height
+            if (i < 4) {
+                _width = _shadowArticulation
+                _height = SQ2 * _shadowArticulation / 2
+            } else {
+                _width = _shadowArticulation
+                _height = _shadowArticulation
+            }
+
+            if (!bufferObj[i]) {
+                bufferObj[i] = glUtil.initFramebufferObject(gl, scene.shadowTextures[i], _width, _height)
+            }
+
+            // NOTE: 下面这两个如果不同时出现会出现错误
+            gl.activeTexture(gl["TEXTURE" + (7 + i)]) // Set a texture object to the texture unit
+            gl.bindTexture(gl.TEXTURE_2D, bufferObj[i].texture)
+
+            gl.clearColor(0, 0, 1, 1)
+            gl.enable(gl.DEPTH_TEST)
+            gl.bindFramebuffer(gl.FRAMEBUFFER, bufferObj[i]) // Change the drawing destination to FBO
+
+            gl.viewport(0, 0, _width, _height) // Set view port for FBO
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // Clear FBO
+            scene.lights.forEach(light => {
+                // light.bufferObj = light.bufferObj ? light.bufferObj : []
+                // if (!light.bufferObj[i]) {
+                //     light.bufferObj[i] = glUtil.initFramebufferObject(gl, scene.shadowTextures[i], _width, _height)
+                // }
+                // // NOTE: 下面这两个如果不同时出现会出现错误
+                // gl.activeTexture(gl["TEXTURE" + (7 + i)]) // Set a texture object to the texture unit
+                // gl.bindTexture(gl.TEXTURE_2D, light.bufferObj[i].texture)
+                //
+                // gl.clearColor(0, 0, 0, 1)
+                // gl.enable(gl.DEPTH_TEST)
+                // gl.bindFramebuffer(gl.FRAMEBUFFER, light.bufferObj[i]) // Change the drawing destination to FBO
+                //
+                // gl.viewport(0, 0, _width, _height) // Set view port for FBO
+                // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // Clear FBO
+
+                if (light.type === "pointLight") {
+                    scene.objs.forEach(obj => {
+                        // obj.drawShadow(gl, light)
+                        obj.drawShadowN(gl, light, i)
+                    })
+                }
+            })
+        }
         // gl.bindTexture(gl.TEXTURE_2D, null);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null) // Change the drawing destination to color buffer
         gl.clearColor(...this.conf.clearColor.getArray())
@@ -80,7 +155,6 @@ class Renderer {
         scene.objs.forEach(obj => {
             obj.draw(gl, scene, cam)
         })
-        // gl.bindTexture(gl.TEXTURE_2D, null)
     }
 }
 
