@@ -36,6 +36,3 @@ varying vec4 vPosFromLight3;
 
 uniform mat4 uProjMatFromLight4;
 varying vec4 vPosFromLight4;
-
-uniform mat4 uProjMatFromLight5;
-varying vec4 vPosFromLight5;

@@ -54,6 +54,9 @@ export default {
             MAX_TEX_UNIT = gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS)
             console.log("纹理单元数量: ", MAX_TEX_UNIT);
 
+            // 直接用img2d保存深度，　不需要转换
+            gl.getExtension("WEBGL_depth_texture")
+
             // 不绘制反面
             gl.enable(gl.CULL_FACE)
             gl.cullFace(gl.BACK)
@@ -94,7 +97,7 @@ export default {
         }
         let buffer = buffers[name]
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer)
-        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STREAM_DRAW) // NOTE: 改成DYNAMIC_DRAW性能反而会变差, STREAM略好一点
+        gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW) // NOTE:改成DYNAMIC_DRAW性能反而会变差
         gl.vertexAttribPointer(a, n, gl.FLOAT, false, 0, 0)
         gl.enableVertexAttribArray(a)
     },
@@ -108,7 +111,7 @@ export default {
             buffers["ELEMENT_ARRAY_BUFFER"] = buffer
         }
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buffer)
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, gl.STREAM_DRAW) // NOTE: 改成DYNAMIC_DRAW性能反而会变差, STREAM略好一点
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, data, gl.STATIC_DRAW) // NOTE:改成DYNAMIC_DRAW性能反而会变差
     },
 
     unf(gl, shaderProgram, name, ...data) {
@@ -201,7 +204,8 @@ export default {
         // }
 
         gl.activeTexture(gl["TEXTURE" + unitNum])
-        gl.bindTexture(gl.TEXTURE_2D, texture)
+        // gl.bindTexture(gl.TEXTURE_2D, texture)
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
         gl.uniform1i(s, unitNum)
     },
 
@@ -307,56 +311,30 @@ export default {
         return framebuffer;
     },
 
+    initFramebufferCube(gl, texture, size) {
+        let framebuffers = []
+        let depthBuffers = []
 
-    initFramebufferObjectCube(gl, texture, width, height) {
-        // framebuffer || (framebuffer = gl.createFramebuffer())
-        // texture = this.gl.createTexture()
-        // depthBuffer || (depthBuffer = gl.createRenderbuffer())
-        // var framebuffer, texture, depthBuffer;
-        let framebuffer = gl.createFramebuffer()
-        let depthBuffer = gl.createRenderbuffer()
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture)
 
-        // Define the error handling function
-        var error = function() {
-            if (framebuffer) gl.deleteFramebuffer(framebuffer);
-            if (texture) gl.deleteTexture(texture);
-            if (depthBuffer) gl.deleteRenderbuffer(depthBuffer);
-            return null;
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+        gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+
+        for (let j = 0; j < 6; j++) {
+            gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + j, 0, gl.RGBA, size, size, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
         }
 
-        // Create a frame buffer object (FBO)
-        // framebuffer = gl.createFramebuffer();
-        if (!framebuffer) {
-            console.log('Failed to create frame buffer object');
-            return error();
+        for (let k = 0; k < 6; k++) {
+            framebuffers[k] = gl.createFramebuffer()
+            depthBuffers[k] = gl.createRenderbuffer() // 这个应该可以公用
+            gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffers[k]);
+            gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, size, size);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers[k])
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_CUBE_MAP_POSITIVE_X + k, texture, 0)
+            gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffers[k])
         }
-
-        // Create a texture object and set its size and parameters
-        // texture = gl.createTexture(); // Create a texture object
-        if (!texture) {
-            console.log('Failed to create texture object');
-            return error();
-        }
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-
-        // Create a renderbuffer object and Set its size and parameters
-        // depthBuffer = gl.createRenderbuffer(); // Create a renderbuffer object
-        if (!depthBuffer) {
-            console.log('Failed to create renderbuffer object');
-            return error();
-        }
-        gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
-        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
-
-        // Attach the texture and the renderbuffer object to the FBO
-        gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-        gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffer);
 
         // Check if FBO is configured correctly
         // var e = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
@@ -365,13 +343,13 @@ export default {
         //     return error();
         // }
 
-        framebuffer.texture = texture; // keep the required object
+        framebuffers.texture = texture; // keep the required object
 
         // Unbind the buffer object
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.bindTexture(gl.TEXTURE_2D, null);
         gl.bindRenderbuffer(gl.RENDERBUFFER, null);
 
-        return framebuffer;
+        return framebuffers;
     },
 }

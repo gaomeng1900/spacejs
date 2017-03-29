@@ -21,7 +21,7 @@ varying vec2 vTexCoord;
 
 // 阴影
 varying vec4 vPosFromLight;
-uniform sampler2D uShadowMap;
+uniform samplerCube uShadowMap;
 
 
 uniform sampler2D uShadowMap0;

@@ -152,24 +152,44 @@ export default class PointLight extends Light {
         // this.pMatFromLight5 = pMatFromLight5
     }
 
+    // updateVMat() {
+    //     this.vMat0 = new Mat4().setLookAt(...this.pos.getArray(),
+    //                                      this.pos.x - 1, this.pos.y + 1, this.pos.z,
+    //                                      1, 1, 0)
+    //     this.vMat1 = new Mat4().setLookAt(...this.pos.getArray(),
+    //                                      this.pos.x + 1, this.pos.y + 1, this.pos.z,
+    //                                      -1, 1, 0)
+    //     this.vMat2 = new Mat4().setLookAt(...this.pos.getArray(),
+    //                                      this.pos.x + 1, this.pos.y - 1, this.pos.z,
+    //                                      1, 1, 0)
+    //     this.vMat3 = new Mat4().setLookAt(...this.pos.getArray(),
+    //                                      this.pos.x - 1, this.pos.y - 1, this.pos.z,
+    //                                      -1, 1, 0)
+    //     this.vMat4 = new Mat4().setLookAt(...this.pos.getArray(),
+    //                                      this.pos.x, this.pos.y, this.pos.z + 1,
+    //                                      1, 1, 0)
+    //     this.vMat5 = new Mat4().setLookAt(...this.pos.getArray(),
+    //                                      this.pos.x, this.pos.y, this.pos.z - 1,
+    //                                      1, 1, 0)
+    // }
     updateVMat() {
         this.vMat0 = new Mat4().setLookAt(...this.pos.getArray(),
-                                         this.pos.x - 1, this.pos.y + 1, this.pos.z,
-                                         1, 1, 0)
+                                         this.pos.x + 1, this.pos.y, this.pos.z,
+                                         0, -1, 0)
         this.vMat1 = new Mat4().setLookAt(...this.pos.getArray(),
-                                         this.pos.x + 1, this.pos.y + 1, this.pos.z,
-                                         -1, 1, 0)
+                                         this.pos.x - 1, this.pos.y, this.pos.z,
+                                         0, -1, 0)
         this.vMat2 = new Mat4().setLookAt(...this.pos.getArray(),
-                                         this.pos.x + 1, this.pos.y - 1, this.pos.z,
-                                         1, 1, 0)
+                                         this.pos.x, this.pos.y + 1, this.pos.z,
+                                         0, 0, 1)
         this.vMat3 = new Mat4().setLookAt(...this.pos.getArray(),
-                                         this.pos.x - 1, this.pos.y - 1, this.pos.z,
-                                         -1, 1, 0)
+                                         this.pos.x, this.pos.y - 1, this.pos.z,
+                                         0, 0, -1)
         this.vMat4 = new Mat4().setLookAt(...this.pos.getArray(),
                                          this.pos.x, this.pos.y, this.pos.z + 1,
-                                         1, 1, 0)
+                                         0, -1, 0)
         this.vMat5 = new Mat4().setLookAt(...this.pos.getArray(),
                                          this.pos.x, this.pos.y, this.pos.z - 1,
-                                         1, 1, 0)
+                                         0, -1, 0)
     }
 }

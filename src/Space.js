@@ -28,7 +28,7 @@ const renderer_conf_default = {
 }
 
 const bufferObj = []
-let FOB
+let FOB, FBOS
 
 // const SQ2 = Math.sqrt(2)
 
@@ -89,77 +89,179 @@ class Renderer {
             obj.updateMat()
         })
 
-        if (!scene.shadowTextures) {
-            scene.shadowTextures = []
-            for (let i = 0; i < 6; i++) {
-                scene.shadowTextures.push(gl.createTexture())
-            }
-        }
-        // test: texture cube
+        // if (!scene.shadowTextures) {
+        //     scene.shadowTextures = []
+        //     for (let i = 0; i < 6; i++) {
+        //         scene.shadowTextures.push(gl.createTexture())
+        //     }
+        // }
+        // // // test: texture cube
+        // // if (!scene.shadow_texture_cube) {
+        // //     scene.shadow_texture_cube = gl.createTexture()
+        // // }
+        // // 画六张shadowmap
+        // for (let i = 0; i < 6; i++) {
+        //     // 画出点光源的shadowmap
+        //     // 完全没有必要弄一个奇怪的立方体
+        //     // let _shadowArticulation = 2048
+        //     // let _width, _height
+        //     // if (i < 4) {
+        //     //     _width = _shadowArticulation
+        //     //     _height = SQ2 * _shadowArticulation / 2
+        //     // } else {
+        //     //     _width = _shadowArticulation
+        //     //     _height = _shadowArticulation
+        //     // }
+        //     //
+        //     // if (!bufferObj[i]) {
+        //     //     bufferObj[i] = glUtil.initFramebufferObject(gl, scene.shadowTextures[i], _width, _height)
+        //     // }
+        //     // 正立方体多方便
+        //     if (!bufferObj[i]) {
+        //         bufferObj[i] = glUtil.initFramebufferObject(gl, scene.shadowTextures[i], OFFSCREEN_WIDTH, OFFSCREEN_WIDTH)
+        //     }
+        //
+        //     // NOTE: 下面这两个如果不同时出现会出现错误
+        //     gl.activeTexture(gl["TEXTURE" + (7 + i)]) // Set a texture object to the texture unit
+        //     gl.bindTexture(gl.TEXTURE_2D, bufferObj[i].texture)
+        //
+        //     gl.clearColor(0, 0, 1, 1)
+        //     gl.enable(gl.DEPTH_TEST)
+        //     gl.bindFramebuffer(gl.FRAMEBUFFER, bufferObj[i]) // Change the drawing destination to FBO
+        //
+        //     gl.viewport(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_WIDTH) // Set view port for FBO
+        //     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // Clear FBO
+        //     scene.lights.forEach(light => {
+        //         // light.bufferObj = light.bufferObj ? light.bufferObj : []
+        //         // if (!light.bufferObj[i]) {
+        //         //     light.bufferObj[i] = glUtil.initFramebufferObject(gl, scene.shadowTextures[i], _width, _height)
+        //         // }
+        //         // // NOTE: 下面这两个如果不同时出现会出现错误
+        //         // gl.activeTexture(gl["TEXTURE" + (7 + i)]) // Set a texture object to the texture unit
+        //         // gl.bindTexture(gl.TEXTURE_2D, light.bufferObj[i].texture)
+        //         //
+        //         // gl.clearColor(0, 0, 0, 1)
+        //         // gl.enable(gl.DEPTH_TEST)
+        //         // gl.bindFramebuffer(gl.FRAMEBUFFER, light.bufferObj[i]) // Change the drawing destination to FBO
+        //         //
+        //         // gl.viewport(0, 0, _width, _height) // Set view port for FBO
+        //         // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // Clear FBO
+        //
+        //         if (light.type === "pointLight") {
+        //             scene.objs.forEach(obj => {
+        //                 // obj.drawShadow(gl, light)
+        //                 obj.drawShadowN(gl, light, i)
+        //             })
+        //         }
+        //     })
+        // }
+
+        // const CUBE_MAP_MAP = [
+        //     "TEXTURE_CUBE_MAP_NEGATIVE_X",
+        //     "TEXTURE_CUBE_MAP_POSITIVE_X",
+        //     "TEXTURE_CUBE_MAP_NEGATIVE_Y",
+        //     "TEXTURE_CUBE_MAP_POSITIVE_Y",
+        //     "TEXTURE_CUBE_MAP_NEGATIVE_Z",
+        //     "TEXTURE_CUBE_MAP_POSITIVE_Z",
+        // ]
+
+        // 画一个cubemap
+        // if (!FOB) {
+
+            // // Create a texture object and set its size and parameters
+            // let texture = gl.createTexture(); // Create a texture object
+            // this.shadow_texture_cube = texture
+            // gl.activeTexture(gl["TEXTURE" + 20])
+            // gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+            //
+            // gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+            // gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+            // gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+            // gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+            //
+            // for (let j = 0; j < 6; j++) {
+            //     gl.texImage2D(gl.TEXTURE_CUBE_MAP_POSITIVE_X + j, 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_WIDTH, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+            // }
+            // gl.bindTexture(gl.TEXTURE_CUBE_MAP, null)
+            //
+            // // gl.texImage2D(gl[CUBE_MAP_MAP[0]], 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_WIDTH, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+            // // gl.texImage2D(gl[CUBE_MAP_MAP[1]], 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_WIDTH, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+            // // gl.texImage2D(gl[CUBE_MAP_MAP[2]], 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_WIDTH, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+            // // gl.texImage2D(gl[CUBE_MAP_MAP[3]], 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_WIDTH, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+            // // gl.texImage2D(gl[CUBE_MAP_MAP[4]], 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_WIDTH, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+            // // gl.texImage2D(gl[CUBE_MAP_MAP[5]], 0, gl.RGBA, OFFSCREEN_WIDTH, OFFSCREEN_WIDTH, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+            // // ??
+            //
+            //
+            // let framebuffers = []
+            // let depthBuffers = []
+            // for (let k = 0; k < 6; k++) {
+            //     framebuffers[k] = gl.createFramebuffer()
+            //     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffers[k])
+            //     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_CUBE_MAP_POSITIVE_X + k, texture, 0)
+            //     depthBuffers[k] = gl.createRenderbuffer() // 这个应该可以公用
+            //     gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffers[k]);
+            //     gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, OFFSCREEN_WIDTH, OFFSCREEN_WIDTH);
+            //     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthBuffers[k])
+            // }
+
+
+        //
+        //     let framebuffer = gl.createFramebuffer()
+        //     FOB = framebuffer
+        //     gl.bindFramebuffer(gl.FRAMEBUFFER, FOB);
+        //
+        //     let depthBuffer = gl.createRenderbuffer()
+        //     gl.bindRenderbuffer(gl.RENDERBUFFER, depthBuffer);
+        //     gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, OFFSCREEN_WIDTH, OFFSCREEN_WIDTH);
+        //
+        //     // Attach the texture and the renderbuffer object to the FBO
+        //     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl[CUBE_MAP_MAP[0]], FOB.texture, 0);
+        //     gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, FOB.depthBuffer);
+        //
+        //
+        //     framebuffer.texture = texture // keep the required object
+        //     scene.shadow_texture_cube = texture
+        //
+        //     // Unbind the buffer object
+        //     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        //     // gl.bindTexture(gl.TEXTURE_2D, null);
+        //     // gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+        //
+        //     // return framebuffer;
+        // // }
+
         if (!scene.shadow_texture_cube) {
             scene.shadow_texture_cube = gl.createTexture()
         }
-        // 画六张shadowmap
-        for (let i = 0; i < 6; i++) {
-            // 画出点光源的shadowmap
-            // 完全没有必要弄一个奇怪的立方体
-            // let _shadowArticulation = 2048
-            // let _width, _height
-            // if (i < 4) {
-            //     _width = _shadowArticulation
-            //     _height = SQ2 * _shadowArticulation / 2
-            // } else {
-            //     _width = _shadowArticulation
-            //     _height = _shadowArticulation
-            // }
-            //
-            // if (!bufferObj[i]) {
-            //     bufferObj[i] = glUtil.initFramebufferObject(gl, scene.shadowTextures[i], _width, _height)
-            // }
-            // 正立方体多方便
-            if (!bufferObj[i]) {
-                bufferObj[i] = glUtil.initFramebufferObject(gl, scene.shadowTextures[i], OFFSCREEN_WIDTH, OFFSCREEN_WIDTH)
-            }
 
-            // NOTE: 下面这两个如果不同时出现会出现错误
-            gl.activeTexture(gl["TEXTURE" + (7 + i)]) // Set a texture object to the texture unit
-            gl.bindTexture(gl.TEXTURE_2D, bufferObj[i].texture)
+        if (!FBOS) {
+            FBOS = glUtil.initFramebufferCube(gl, scene.shadow_texture_cube, OFFSCREEN_WIDTH, OFFSCREEN_WIDTH)
+        }
+
+        for (let i = 0; i < 6; i++) {
+
+            gl.activeTexture(gl["TEXTURE" + 20]) // Set a texture object to the texture unit
+            gl.bindTexture(gl.TEXTURE_CUBE_MAP, FBOS.texture)
 
             gl.clearColor(0, 0, 1, 1)
             gl.enable(gl.DEPTH_TEST)
-            gl.bindFramebuffer(gl.FRAMEBUFFER, bufferObj[i]) // Change the drawing destination to FBO
 
+            gl.bindFramebuffer(gl.FRAMEBUFFER, FBOS[i]);
+
+            // gl.bindFramebuffer(gl.FRAMEBUFFER, bufferObj[i]) // Change the drawing destination to FBO
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
             gl.viewport(0, 0, OFFSCREEN_WIDTH, OFFSCREEN_WIDTH) // Set view port for FBO
-            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // Clear FBO
             scene.lights.forEach(light => {
-                // light.bufferObj = light.bufferObj ? light.bufferObj : []
-                // if (!light.bufferObj[i]) {
-                //     light.bufferObj[i] = glUtil.initFramebufferObject(gl, scene.shadowTextures[i], _width, _height)
-                // }
-                // // NOTE: 下面这两个如果不同时出现会出现错误
-                // gl.activeTexture(gl["TEXTURE" + (7 + i)]) // Set a texture object to the texture unit
-                // gl.bindTexture(gl.TEXTURE_2D, light.bufferObj[i].texture)
-                //
-                // gl.clearColor(0, 0, 0, 1)
-                // gl.enable(gl.DEPTH_TEST)
-                // gl.bindFramebuffer(gl.FRAMEBUFFER, light.bufferObj[i]) // Change the drawing destination to FBO
-                //
-                // gl.viewport(0, 0, _width, _height) // Set view port for FBO
-                // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // Clear FBO
-
                 if (light.type === "pointLight") {
                     scene.objs.forEach(obj => {
-                        // obj.drawShadow(gl, light)
                         obj.drawShadowN(gl, light, i)
                     })
                 }
             })
+            // gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT) // Clear FBO
+
         }
-
-
-        // 画一个cubemap
-
-
 
         // gl.bindTexture(gl.TEXTURE_2D, null);
         gl.bindFramebuffer(gl.FRAMEBUFFER, null) // Change the drawing destination to color buffer
@@ -170,6 +272,7 @@ class Renderer {
         scene.objs.forEach(obj => {
             obj.draw(gl, scene, cam)
         })
+
     }
 }
 

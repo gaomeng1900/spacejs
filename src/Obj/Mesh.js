@@ -65,10 +65,16 @@ export default class Mesh extends Obj{
         // 阴影
         // glUtil.bindTextureWithUnit(gl, shaderProgram, "uShadowMap", 7, scene.texture)
         // glUtil.uMat(gl, shaderProgram, "uProjMatFromLight", this.pMatFromLight.getArray())
-        for (let i = 0; i < 6; i++) {
-            glUtil.bindTextureWithUnit(gl, shaderProgram, "uShadowMap" + i, 7 + i, scene.shadowTextures[i])
-            glUtil.uMat(gl, shaderProgram, "uProjMatFromLight" + i, this["pMatFromLight" + i].getArray())
-        }
+
+        // for (let i = 0; i < 6; i++) {
+        //     glUtil.bindTextureWithUnit(gl, shaderProgram, "uShadowMap" + i, 7 + i, scene.shadowTextures[i])
+        //     glUtil.uMat(gl, shaderProgram, "uProjMatFromLight" + i, this["pMatFromLight" + i].getArray())
+        // }
+
+        glUtil.bindTextureWithUnit(gl, shaderProgram, "uShadowMap", 20, scene.shadow_texture_cube)
+        // glUtil.bindTexture(gl, shaderProgram, "uShadowMap", )
+        glUtil.uMat(gl, shaderProgram, "uProjMatFromLight", this["pMatFromLight" + 0].getArray())
+
 
         // 矩阵
         glUtil.uMat(gl, shaderProgram, "uModelMat", this.mMat.getArray())
@@ -81,35 +87,35 @@ export default class Mesh extends Obj{
         gl.drawElements(gl[geom.drawMode], geom.drawCount, gl[geom.drawType], geom.drawOffset)
     }
 
-    drawShadow(gl, light) {
-        const geom = this.geom
-        const material = this.material
-        // 更新 模型矩阵, 模型逆转置矩阵
-        this.updateMat()
-
-        let shaderProgram = material.programShadow
-        gl.useProgram(shaderProgram)
-
-        // 顶点
-        glUtil.bindArrayBuffer(gl, shaderProgram, "aPosition", geom.vertices)
-
-        // 顶点顺序
-        glUtil.bindElemArrayBuffer(gl, geom.indices)
-
-        // 矩阵
-        // 如果是点光源, 就让这个光照向这个物体
-        let pMat = new Mat4().setPerspective(90, 1, 0.1, 100)
-        let vMat = new Mat4().setLookAt(...light.pos.getArray(),
-                                        0, 0, 0,
-                                        0, 1, 0, // TODO: 可能和视线重合
-                                        )
-        let pMatFromLight = pMat.mult(vMat).mult(this.mMat)
-        this.pMatFromLight = pMatFromLight
-
-        glUtil.uMat(gl, shaderProgram, "uProjMatFromLight", pMatFromLight.getArray())
-
-        gl.drawElements(gl[geom.drawMode], geom.drawCount, gl[geom.drawType], geom.drawOffset)
-    }
+    // drawShadow(gl, light) {
+    //     const geom = this.geom
+    //     const material = this.material
+    //     // 更新 模型矩阵, 模型逆转置矩阵
+    //     this.updateMat()
+    //
+    //     let shaderProgram = material.programShadow
+    //     gl.useProgram(shaderProgram)
+    //
+    //     // 顶点
+    //     glUtil.bindArrayBuffer(gl, shaderProgram, "aPosition", geom.vertices)
+    //
+    //     // 顶点顺序
+    //     glUtil.bindElemArrayBuffer(gl, geom.indices)
+    //
+    //     // 矩阵
+    //     // 如果是点光源, 就让这个光照向这个物体
+    //     let pMat = new Mat4().setPerspective(90, 1, 0.1, 100)
+    //     let vMat = new Mat4().setLookAt(...light.pos.getArray(),
+    //                                     0, 0, 0,
+    //                                     0, 1, 0, // TODO: 可能和视线重合
+    //                                     )
+    //     let pMatFromLight = pMat.mult(vMat).mult(this.mMat)
+    //     this.pMatFromLight = pMatFromLight
+    //
+    //     glUtil.uMat(gl, shaderProgram, "uProjMatFromLight", pMatFromLight.getArray())
+    //
+    //     gl.drawElements(gl[geom.drawMode], geom.drawCount, gl[geom.drawType], geom.drawOffset)
+    // }
 
     drawShadowN(gl, light, n) {
         const geom = this.geom
@@ -128,9 +134,14 @@ export default class Mesh extends Obj{
 
         // 矩阵
         // NOTE: 能不能缓存!!!
-        let pMatFromLight = light.getMatFromLight(this.mMat, n)
+        // let pMatFromLight = new Mat4().setScale(1, -1, 1).mult(light.getMatFromLight(this.mMat, n))
+        let pMatFromLight = (light.getMatFromLight(this.mMat, n))
         this["pMatFromLight" + n] = pMatFromLight
         glUtil.uMat(gl, shaderProgram, "uProjMatFromLight", pMatFromLight.getArray())
+
+        // test
+        glUtil.uMat(gl, shaderProgram, "uModelMat", this.mMat.getArray())
+        glUtil.unf(gl, shaderProgram, "uPointLightPos", light.pos.x, light.pos.y, light.pos.z)
 
         gl.drawElements(gl[geom.drawMode], geom.drawCount, gl[geom.drawType], geom.drawOffset)
     }
