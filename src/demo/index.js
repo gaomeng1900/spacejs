@@ -32,8 +32,8 @@ canvas.addEventListener("mousemove", event => {
 // GL 渲染器
 let renderer = new Space.Renderer({
     canvas: document.getElementById("canvas"),
-    width: 700,
-    height: 700,
+    width: 1000,
+    height: 1000,
     clearColor: new Space.Color(0.5, 0.5, 0.5, 1)
 })
 
@@ -85,7 +85,7 @@ cone1.pos.set(-2, -4, -3)
 
 import earth_img from "./earth-0.jpg"
 let material2 = new Space.BasicMaterial({map: new Space.Texture(earth_img)})
-let sphere0 = new Space.Mesh(new Space.SphereGeom(1.5, 20, 20), material2)
+let sphere0 = new Space.Mesh(new Space.SphereGeom(1.5, 36, 36), material2)
 sphere0.pos.set(0, 0, -2)
 scene.add(sphere0)
 
@@ -107,16 +107,16 @@ let line0 = new Space.Line(new Space.LineGeom(keyPoints), lineMaterial)
 const render = ()=>{
     requestAnimationFrame(render)
     // cube.pos.x += 0.1
-    cube0.rotateY(1)
-    cube0.rotateX(0.7)
-    cube0.rotateZ(0.5)
+    cube0.rotateY(0.3)
+    cube0.rotateX(0.2)
+    cube0.rotateZ(0.1)
 
-    cube1.rotateZ(0.7)
-    cube1.rotateY(0.2)
-    cube1.rotateX(0.1)
+    cube1.rotateZ(0.4)
+    cube1.rotateY(0.1)
+    cube1.rotateX(0.05)
 
-    cube2.rotateX(-0.5)
-    cube2.rotateY(0.5)
+    cube2.rotateX(-0.3)
+    cube2.rotateY(0.3)
 
     custom.rotateY(1)
     custom.rotateX(1)

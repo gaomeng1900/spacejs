@@ -87,36 +87,6 @@ export default class Mesh extends Obj{
         gl.drawElements(gl[geom.drawMode], geom.drawCount, gl[geom.drawType], geom.drawOffset)
     }
 
-    // drawShadow(gl, light) {
-    //     const geom = this.geom
-    //     const material = this.material
-    //     // 更新 模型矩阵, 模型逆转置矩阵
-    //     this.updateMat()
-    //
-    //     let shaderProgram = material.programShadow
-    //     gl.useProgram(shaderProgram)
-    //
-    //     // 顶点
-    //     glUtil.bindArrayBuffer(gl, shaderProgram, "aPosition", geom.vertices)
-    //
-    //     // 顶点顺序
-    //     glUtil.bindElemArrayBuffer(gl, geom.indices)
-    //
-    //     // 矩阵
-    //     // 如果是点光源, 就让这个光照向这个物体
-    //     let pMat = new Mat4().setPerspective(90, 1, 0.1, 100)
-    //     let vMat = new Mat4().setLookAt(...light.pos.getArray(),
-    //                                     0, 0, 0,
-    //                                     0, 1, 0, // TODO: 可能和视线重合
-    //                                     )
-    //     let pMatFromLight = pMat.mult(vMat).mult(this.mMat)
-    //     this.pMatFromLight = pMatFromLight
-    //
-    //     glUtil.uMat(gl, shaderProgram, "uProjMatFromLight", pMatFromLight.getArray())
-    //
-    //     gl.drawElements(gl[geom.drawMode], geom.drawCount, gl[geom.drawType], geom.drawOffset)
-    // }
-
     drawShadowN(gl, light, n) {
         const geom = this.geom
         const material = this.material
